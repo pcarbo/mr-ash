@@ -1,24 +1,33 @@
-# Optimize the variational lower bound ("ELBO") for the mr-ash model
-# by running a fixed number of co-ordinate ascent updates.
-mr_ash <- function (X, y, b, se, s0, w0, numiter = 100) {
+# Perform EM updates for the mr-ash model.
+#
+# This implementation is meant to be "instructive"---that is, I've
+# tried to make the code as simple as possible, with an emphasis on
+# clarity. Very little effort has been devoted to making the
+# implementation efficient, or the code concise.
+mr_ash <- function (X, y, se, s0, w0, b, numiter = 100) {
 
   # Center X and y.
-  X <- scale(X,center = TRUE,scale = FALSE)
+  X <- scale(X,scale = FALSE)
   y <- y - mean(y)
   
-  # This variable is used to keep track of the algorithm's progress:
-  # it stores the value of the objective (the variational lower bound,
-  # or "ELBO") at each iteration.
-  value <- rep(0,numiter)
+  # These two variables are used to keep track of the algorithm's
+  # progress: "elbo" stores the value of the objective (the
+  # variational lower bound, or "ELBO") at each iteration; "maxd"
+  # stores the largest different in the posterior mean coefficients
+  # between two successive iterations.
+  elbo <- rep(0,numiter)
+  maxd <- rep(0,numiter)
 
-  # Iterate the E and M steps.
-  for (iter in 1:numiter) {
+  # Iterate the EM updates.
+  for (i in 1:numiter) {
 
+    # Save the current estimates of the posterior means.
+    b0 <- b
+    
     # E STEP
     # ------
-    # Run the co-ordinate ascent updates to update the variational
-    # approximation to the posterior distribution of regression
-    # coefficients.
+    # Update the posterior means of the regression coefficients via
+    # co-ordinate ascent.
     b <- mr_ash_update(X,y,b,se,s0,w)
 
     # M STEP
@@ -30,45 +39,55 @@ mr_ash <- function (X, y, b, se, s0, w0, numiter = 100) {
     # TO DO.
     
     # Record the algorithm's progress.
-    value[iter] <- mr_ash_elbo(X,y,b,s,s0,w0)
+    # elbo[i] <- mr_ash_elbo(X,y,b,s,s0,w0)
+    maxd[i] <- abs(max(b - b0))
   }
 
-  # Return the estimate of the regression coefficients ("b") and the
-  # value of the objective at each iteration ("value").
-  return(list(b = b,value = value))
+  # Return the updated posterior means of the regression coefficicents
+  # ("b"), the value of the objective at each iteration ("elbo"), and
+  # the maximum change at each iteration ("maxd").
+  return(list(b    = b,
+              elbo = elbo,
+              maxd = maxd))
 }
 
-# Do a single pass of the co-ordinate ascent updates.
+# Perform a single pass of the co-ordinate ascent updates for the
+# mr-ash model.
+#
+# This implementation is meant to be "instructive"---that is, I've
+# tried to make the code as simple as possible, with an emphasis on
+# clarity. Very little effort has been devoted to making the
+# implementation efficient, or the code concise.
 mr_ash_update <- function (X, y, b, se, s0, w0) {
 
   # Get the number of predictors.
-  p <- length(b)
+  p <- ncol(X)
   
   # Compute the expected residuals.
-  r <- y - drop(X %*% b)
+  r <- drop(y - X %*% b)
   
   # Repeat for each predictor.
   for (i in 1:p) {
 
-    # Remove the jth effect from expected residuals.
-    rj <- r + X[,j]*b[j]
+    # Disregard the ith predictor in the expected residuals.
+    r <- r + X[,i]*b[i]
 
-    # Fit a Bayesian single-effect regression with a
-    # mixture-of-normals prior to the expected residuals.
-    out <- slr_mix(rj,X[,j],se,s0,w0)
+    # Update the posterior distribution of the regression coefficients
+    # for the ith predictor.
+    out <- slr_mix(r,X[,i],se,s0,w0)
 
     # Update the expected residuals.
-    r <- rj - X[,j]*b[j]
+    r <- r - X[,i]*b[i]
   }
 
   # Return the updated posterior mean coefficients.
   return(b)
 }
 
-# Fit a single-effect regression model in which the regression
+# Fit a univariate linear regression model in which the regression
 # coefficient is assigned a normal prior with mean zero and
 # variance s0.
-slr_ridge <- function (x, y, se, s0) {
+bayes_lr_ridge <- function (x, y, se, s0) {
 
   # Compute the least-squares estimate (bhat) and its variance (s).
   bhat <- dot(x,y)/dot(x,x)
