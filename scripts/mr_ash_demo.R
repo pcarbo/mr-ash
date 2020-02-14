@@ -13,7 +13,7 @@ w  <- c(0.98, 0.01, 0.01)
 
 # Variances for the mixture-of-normals prior on the regression
 # coefficients.
-s0 <- c(0.1,1,10)^2
+s0 <- c(0.01,0.5,1)^2
 
 # SIMULATE DATA
 # -------------

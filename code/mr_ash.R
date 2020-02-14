@@ -28,25 +28,28 @@ mr_ash <- function (X, y, se, s0, w0, b, numiter = 100) {
     # ------
     # Update the posterior means of the regression coefficients via
     # co-ordinate ascent.
-    b <- mr_ash_update(X,y,b,se,s0,w0)
-
+    out <- mr_ash_update(X,y,b,se,s0,w0)
+    b   <- out$b
+    
     # M STEP
     # ------
     # Update the residual variance.
     # TO DO.
     
     # Update the mixture weights.
-    # TO DO.
-    
+    w0 <- out$w0est
+    print(w0)
     # Record the algorithm's progress.
     # elbo[i] <- mr_ash_elbo(X,y,b,s,s0,w0)
     maxd[i] <- abs(max(b - b0))
   }
 
   # Return the updated posterior means of the regression coefficicents
-  # ("b"), the value of the objective at each iteration ("elbo"), and
-  # the maximum change at each iteration ("maxd").
+  # ("b"), the updated mixture weights ("w0"), the value of the
+  # objective at each iteration ("elbo"), and the maximum change at
+  # each iteration ("maxd").
   return(list(b    = b,
+              w0   = w0,
               elbo = elbo,
               maxd = maxd))
 }
@@ -60,8 +63,14 @@ mr_ash <- function (X, y, se, s0, w0, b, numiter = 100) {
 # implementation efficient, or the code concise.
 mr_ash_update <- function (X, y, b, se, s0, w0) {
 
-  # Get the number of predictors.
+  # Get the number of mixture components (k) and the number of
+  # predictors (p).
+  k <- length(w0)
   p <- ncol(X)
+
+  # This will be the M-step update for the weights in the
+  # mixture-of-normals.
+  w0est <- rep(0,k)
   
   # Compute the expected residuals.
   r <- drop(y - X %*% b)
@@ -75,15 +84,18 @@ mr_ash_update <- function (X, y, b, se, s0, w0) {
 
     # Update the posterior distribution of the regression coefficients
     # for the ith predictor.
-    out  <- bayes_lr_mix(x,r,se,s0,w0)
-    b[i] <- out$mu1
+    out   <- bayes_lr_mix(x,r,se,s0,w0)
+    b[i]  <- out$mu1
+    w0est <- w0est + out$w1
 
     # Update the expected residuals.
     r <- r - x*b[i]
   }
 
-  # Output the updated posterior mean coefficients.
-  return(b)
+  # Output the updated posterior mean coefficients (b) and the M-step
+  # update for the mixture weights..
+  return(list(b     = b,
+              w0est = w0est/p))
 }
 
 # Fit a univariate linear regression model in which the regression
@@ -169,4 +181,3 @@ bayes_lr_mix <- function (x, y, se, s0, w0) {
               w1    = w1,
               logbf = logbf))
 }
-
