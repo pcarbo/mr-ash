@@ -80,28 +80,51 @@ mr_ash_update <- function (X, y, b, se, s0, w0) {
     r <- r - X[,i]*b[i]
   }
 
-  # Return the updated posterior mean coefficients.
+  # Output the updated posterior mean coefficients.
   return(b)
+}
+
+# Fit a univariate linear regression model in which the regression
+# coefficient is assigned a mixture-of-normals prior.
+#
+# This implementation is meant to be "instructive"---that is, I've
+# tried to make the code as simple as possible, with an emphasis on
+# clarity. Very little effort has been devoted to making the
+# implementation efficient, or the code concise.
+bayes_slr_mix <- function (x, y) {
+
 }
 
 # Fit a univariate linear regression model in which the regression
 # coefficient is assigned a normal prior with mean zero and
 # variance s0.
+#
+# This implementation is meant to be "instructive"---that is, I've
+# tried to make the code as simple as possible, with an emphasis on
+# clarity. Very little effort has been devoted to making the
+# implementation efficient, or the code concise.
 bayes_lr_ridge <- function (x, y, se, s0) {
 
-  # Compute the least-squares estimate (bhat) and its variance (s).
-  bhat <- dot(x,y)/dot(x,x)
-  s    <- se/dot(x,x)
-
-  # Compute the posterior mean (mu1) and variance (s1).
+  # Compute the least-squares estimate of the coefficients (bhat) and
+  # its standard error (s).
+  xx   <- norm2(x)^2
+  bhat <- dot(x,y)/xx
+  s    <- se/xx
+  
+  # Compute the posterior mean (mu1) and variance (s1) assuming a
+  # normal prior wiith zero mean and variance s0.
   s1  <- s0/(1 + s0/s)
   mu1 <- s1/s*bhat
 
   # Compute the log-Bayes factor.
-  logbf <- (log(s/(s0 + s)) + (norm2(bhat)^2/s - norm2(bhat)^2/(s0 + s)))/2
+  logbf <- ldnorm(bhat,s0 + s) - ldnorm(bhat,s)
 
-  # Return the least-squares estimate (bhat), its variance (s), the
-  # posterior mean and standard deviation (mu1, s1), and the
-  # logarithm of the Bayes factor (logbf).
-  return(list(bhat = bhat,s = s,mu1 = mu1,s1 = s1,logbf = logbf))
+  # Return the least-squares estimate (bhat) and its variance (s), the
+  # posterior mean (mu1) and variance (S1), and the log-Bayes factor
+  # (logbf).
+  return(list(bhat  = bhat,
+              s     = s,
+              mu1   = mu1,
+              s1    = s1,
+              logbf = logbf))
 }
