@@ -39,3 +39,6 @@ fit <- mr_ash(X,y,s,s0,w0,b,100)
 # simulate the data.
 plot(beta,fit$b,pch = 20,col = "black")
 abline(a = 0,b = 1,col = "skyblue",lty = "dotted")
+
+# Plot the improvement in the solution over time.
+# TO DO.
