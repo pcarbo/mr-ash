@@ -31,18 +31,18 @@ mr_ash <- function (X, y, se, s0, w0, b, numiter = 100) {
     out <- mr_ash_update(X,y,b,se,s0,w0)
     b   <- out$b
     
+    # Record the algorithm's progress.
+    elbo[i] <- out$elbo
+    maxd[i] <- abs(max(b - b0))
+    
     # M STEP
     # ------
     # Update the residual variance.
     # TO DO.
     
     # Update the mixture weights.
-    w0 <- out$w0est
-    print(w0)
-    # Record the algorithm's progress.
-    # elbo[i] <- mr_ash_elbo(X,y,b,s,s0,w0)
-    maxd[i] <- abs(max(b - b0))
-  }
+    # w0 <- out$w0.em
+  } 
 
   # Return the updated posterior means of the regression coefficicents
   # ("b"), the updated mixture weights ("w0"), the value of the
@@ -68,13 +68,18 @@ mr_ash_update <- function (X, y, b, se, s0, w0) {
   k <- length(w0)
   p <- ncol(X)
 
+  # FOR TESTING ONLY
+  mu1 <- matrix(0,p,k)
+  s1  <- matrix(0,p,k)
+  w1  <- matrix(0,p,k)
+  
   # This will be the M-step update for the weights in the
   # mixture-of-normals.
-  w0est <- rep(0,k)
+  w0.em <- rep(0,k)
   
   # Compute the expected residuals.
   r <- drop(y - X %*% b)
-  
+
   # Repeat for each predictor.
   for (i in 1:p) {
     x <- X[,i]
@@ -86,16 +91,25 @@ mr_ash_update <- function (X, y, b, se, s0, w0) {
     # for the ith predictor.
     out   <- bayes_lr_mix(x,r,se,s0,w0)
     b[i]  <- out$mu1
-    w0est <- w0est + out$w1
+    w0.em <- w0.em + out$w1
 
+    # FOR TESTING ONLY
+    mu1[i,] <- out$mu1_mix
+    s1[i,]  <- out$s1_mix
+    w1[i,]  <- out$w1
+    
     # Update the expected residuals.
     r <- r - x*b[i]
   }
 
+  # FOR TESTING ONLY
+  elbo <- compute_elbo(X,y,se,s0,w0,w1,mu1,s1)
+  
   # Output the updated posterior mean coefficients (b) and the M-step
-  # update for the mixture weights..
+  # update for the mixture weights (w0.em).
   return(list(b     = b,
-              w0est = w0est/p))
+              w0.em = w0.em/p,
+              elbo  = elbo))
 }
 
 # Fit a univariate linear regression model in which the regression
@@ -179,5 +193,37 @@ bayes_lr_mix <- function (x, y, se, s0, w0) {
   return(list(mu1   = mu1,
               s1    = drop(s1),
               w1    = w1,
-              logbf = logbf))
+              logbf = logbf,
+
+              # FOR TESTING ONLY
+              mu1_mix = sapply(out,"[[","mu1"),
+              s1_mix  = sapply(out,"[[","s1")))
 }
+
+# FOR TESTING ONLY.
+compute_elbo <- function (X, y, se, s0, w0, w1, mu1, s1) {
+  e <- 1e-30
+  
+  # Get the number of samples (n), the number of variables (p), and
+  # the number of mixture components (k).
+  n <- nrow(X)
+  p <- ncol(X)
+  k <- length(w0)
+
+  # Compute the ELBO.
+  d <- diag(crossprod(X))
+  b <- rowSums(w1 * mu1)
+  f <- -n*log(2*pi*se)/2 -
+        norm2(y - X %*% b)^2/(2*se) -
+        dot(d,betavarmix(w1,mu1,s1))/(2*se)
+  for (i in 1:k)
+    f <- f + sum(w1[,i]*log(w0[i] + e)) - sum(w1[,i]*log(w1[,i] + e))
+  for (i in 1:k)
+    f <- f + sum(w1[,i])/2 + dot(w1[,i],log(s1[,i]/s0[i]))/2 -
+             dot(w1[,i],s1[,i] + mu1[,i]^2)/(2*s0[i])
+  return(f)
+}
+
+# FOR TESTING ONLY.
+betavarmix <- function (p, mu, s)
+  rowSums(p*(s + mu^2)) - rowSums(p*mu)^2
