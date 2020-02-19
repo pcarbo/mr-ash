@@ -81,6 +81,10 @@ mr_ash_update <- function (X, y, b, se, s0, w0) {
   v <- 0
   d <- 0
   
+  # Compute the term in the ELBO that does not change as the
+  # variational approximation is updated.
+  elbo_const <- -n*log(2*pi*se)/2
+  
   # Compute the expected residuals.
   r <- drop(y - X %*% b)
 
@@ -106,7 +110,7 @@ mr_ash_update <- function (X, y, b, se, s0, w0) {
     # the posterior and prior distributions of the regression
     # coefficient for the ith predictor.
     erss <- norm2(r - x*b[i])^2 + vi
-    di   <- -(out$logbf + out$loglik + n*log(2*pi*se)/2 + erss/(2*se))
+    di   <- elbo_const - out$logbf - out$loglik0 - erss/(2*se)
     d    <- d + di
     
     # Update the expected residuals.
@@ -116,7 +120,7 @@ mr_ash_update <- function (X, y, b, se, s0, w0) {
   # Compute the expected residual sum of squares (erss) and the
   # variational lower bound (elbo).
   erss <- norm2(r)^2 + v
-  elbo <- -n*log(2*pi*se)/2 - erss/(2*se) - d
+  elbo <- elbo_const - erss/(2*se) - d
   
   # Output the updated posterior mean coefficients ("b"), the M-step
   # update for the mixture weights ("w0.em"), the updated variational
