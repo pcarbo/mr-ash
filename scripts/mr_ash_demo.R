@@ -41,4 +41,5 @@ plot(beta,fit$b,pch = 20,col = "black")
 abline(a = 0,b = 1,col = "skyblue",lty = "dotted")
 
 # Plot the improvement in the solution over time.
-# TO DO.
+plot(max(fit$elbo) - fit$elbo + 1e-8,type = "l",col = "dodgerblue",
+     lwd = 2,log = "y",xlab = "iteration",ylab = "distance to best ELBO")
