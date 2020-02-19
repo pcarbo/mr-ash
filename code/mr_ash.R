@@ -4,7 +4,8 @@
 # tried to make the code as simple as possible, with an emphasis on
 # clarity. Very little effort has been devoted to making the
 # implementation efficient, or the code concise.
-mr_ash <- function (X, y, se, s0, w0, b, numiter = 100) {
+mr_ash <- function (X, y, se, s0, w0, b, numiter = 100, tol = 1e-8,
+                    update.w0 = TRUE) {
 
   # Center X and y.
   X <- scale(X,scale = FALSE)
@@ -15,8 +16,8 @@ mr_ash <- function (X, y, se, s0, w0, b, numiter = 100) {
   # variational lower bound, or "ELBO") at each iteration; "maxd"
   # stores the largest different in the posterior mean coefficients
   # between two successive iterations.
-  elbo <- rep(0,numiter)
-  maxd <- rep(0,numiter)
+  elbo <- rep(as.numeric(NA),numiter)
+  maxd <- rep(as.numeric(NA),numiter)
 
   # Iterate the EM updates.
   for (i in 1:numiter) {
@@ -34,14 +35,20 @@ mr_ash <- function (X, y, se, s0, w0, b, numiter = 100) {
     # Record the algorithm's progress.
     elbo[i] <- out$elbo
     maxd[i] <- abs(max(b - b0))
-    
+
     # M STEP
     # ------
     # Update the residual variance.
     se <- out$erss/n
     
-    # Update the mixture weights.
-    w0 <- out$w0.em
+    # Update the mixture weights, if requested.
+    if (update.w0)
+      w0 <- out$w0.em
+
+    # Stop if the largest change in the posterior means of the
+    # regression coefficients is small.
+    if (maxd[i] <= tol)
+      break
   } 
 
   # Return the updated posterior means of the regression coefficicents
@@ -52,8 +59,8 @@ mr_ash <- function (X, y, se, s0, w0, b, numiter = 100) {
   return(list(b    = b,
               w0   = w0,
               se   = se,
-              elbo = elbo,
-              maxd = maxd))
+              elbo = elbo[1:i],
+              maxd = maxd[1:i]))
 }
 
 # Perform a single pass of the co-ordinate ascent updates for the
