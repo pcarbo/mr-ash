@@ -75,9 +75,9 @@ mr_ash_update <- function (X, y, b, se, s0, w0) {
   # mixture-of-normals.
   w0.em <- rep(0,k)
 
-  # These two variables are used to store the sum-of-variances (v) and
-  # Kullback-Leibler divergence (d) terms in the expression for the
-  # ELBO.
+  # These two variables are used to store the sum-of-variances term
+  # ("v") and Kullback-Leibler divergence term ("d") in the expression
+  # for the ELBO.
   v <- 0
   d <- 0
   
@@ -101,7 +101,7 @@ mr_ash_update <- function (X, y, b, se, s0, w0) {
     b[i]  <- out$mu1
     w0.em <- w0.em + out$w1
 
-    # Calculate the ith term in the "sum of variances".
+    # Calculate the ith term in the "sum of variances" for the ELBO.
     vi <- norm2(x)^2 * out$s1
     v  <- v + vi
     
@@ -110,7 +110,7 @@ mr_ash_update <- function (X, y, b, se, s0, w0) {
     # the posterior and prior distributions of the regression
     # coefficient for the ith predictor.
     erss <- norm2(r - x*b[i])^2 + vi
-    di   <- elbo_const - out$logbf - out$loglik0 - erss/(2*se)
+    di   <- elbo_const - (out$logbf + out$loglik0 + erss/(2*se))
     d    <- d + di
     
     # Update the expected residuals.
