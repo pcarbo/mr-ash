@@ -13,7 +13,7 @@ softmax <- function (x) {
   return(y/sum(y))
 }
 
-# Returns the log-density of the normal distribution with zero mean
-# and variance s at x.
+# Returns the log-density of the multivariate normal with mean zero and
+# covariance s*I at x.
 ldnorm <- function (x, s)
-  dnorm(x,sd = sqrt(s),log = TRUE)
+  sum(dnorm(x,sd = sqrt(s),log = TRUE))

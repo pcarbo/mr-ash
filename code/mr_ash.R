@@ -71,11 +71,6 @@ mr_ash_update <- function (X, y, b, se, s0, w0) {
   p <- ncol(X)
   k <- length(w0)
 
-  # FOR TESTING ONLY
-  mu1_mix <- matrix(0,p,k)
-  s1_mix <- matrix(0,p,k)
-  w1_mix <- matrix(0,p,k)
-  
   # This will be the M-step update for the weights in the
   # mixture-of-normals.
   w0.em <- rep(0,k)
@@ -103,24 +98,22 @@ mr_ash_update <- function (X, y, b, se, s0, w0) {
     w0.em <- w0.em + out$w1
 
     # Calculate the ith term in the "sum of variances".
-    v <- v + norm2(x)^2*out$s1
+    vi <- norm2(x)^2 * out$s1
+    v  <- v + vi
     
-    f   <- 0
-    s1  <- out$s1_mix
-    mu1 <- out$mu1_mix
-    w1  <- out$w1
-    for (j in 1:k) {
-      f <- f + w1[j]*log(w0[j]) - w1[j]*log(w1[j])
-      f <- f + w1[j]/2 + w1[j]*log(s1[j]/s0[j])/2 -
-               (w1[j]*(s1[j] + mu1[j]^2))/(2*s0[j])
-    }
-    d <- d - f
+    # Compute the expected residual sum of of squares (erss) for the
+    # linear regression r = xi*bi + e, and the KL-divergence between
+    # the posterior and prior distributions of the regression
+    # coefficient for the ith predictor.
+    erss <- norm2(r - x*b[i])^2 + vi
+    di   <- -(out$logbf + out$loglik + n*log(2*pi*se)/2 + erss/(2*se))
+    d    <- d + di
     
     # Update the expected residuals.
     r <- r - x*b[i]
   }
 
-  # Compute the expected reesidual sum of squares (erss) and the
+  # Compute the expected residual sum of squares (erss) and the
   # variational lower bound (elbo).
   erss <- norm2(r)^2 + v
   elbo <- -n*log(2*pi*se)/2 - erss/(2*se) - d
@@ -156,17 +149,21 @@ bayes_lr_ridge <- function (x, y, se, s0) {
   s1  <- s0/(1 + s0/s)
   mu1 <- s1/s*bhat
 
+  # Compute the "null" log-likelihood.
+  loglik0 <- ldnorm(y,se)
+  
   # Compute the log-Bayes factor.
   logbf <- ldnorm(bhat,s0 + s) - ldnorm(bhat,s)
-  
+
   # Return the least-squares estimate (bhat) and its variance (s), the
-  # posterior mean (mu1) and variance (S1), and the log-Bayes factor
-  # (logbf).
-  return(list(bhat  = bhat,
-              s     = s,
-              mu1   = mu1,
-              s1    = s1,
-              logbf = logbf))
+  # posterior mean (mu1) and variance (S1), the log-likelihood for the
+  # "null" model (when b = 0), and the log-Bayes factor (logbf).
+  return(list(bhat    = bhat,
+              s       = s,
+              mu1     = mu1,
+              s1      = s1,
+              loglik0 = loglik0,
+              logbf   = logbf))
 }
 
 # Fit a univariate linear regression model in which the regression
@@ -211,14 +208,11 @@ bayes_lr_mix <- function (x, y, se, s0, w0) {
   s1 <- s1 - mu1^2
   
   # Return the the posterior mean (mu1) and svariance (s1), the
-  # posterior assignment probabilities (w1), and the log-Bayes factor
-  # (logbf).
-  return(list(mu1   = mu1,
-              s1    = drop(s1),
-              w1    = w1,
-              logbf = logbf,
-
-              # FOR TESTING ONLY
-              mu1_mix = sapply(out,"[[","mu1"),
-              s1_mix  = sapply(out,"[[","s1")))
+  # posterior assignment probabilities (w1), the log-likelihood for
+  # the "null" model (when b = 0), and the log-Bayes factor (logbf).
+  return(list(mu1     = mu1,
+              s1      = drop(s1),
+              w1      = w1,
+              loglik0 = out[[1]]$loglik0,
+              logbf   = logbf))
 }
