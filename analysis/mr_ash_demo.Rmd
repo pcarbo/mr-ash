@@ -1,0 +1,90 @@
+---
+title: "mr-ash demo"
+author: "Peter Carbonetto"
+date: February 20, 2020
+site: workflowr::wflow_site
+output: workflowr::wflow_html
+---
+
+An illustration of the "mr-ash" co-ordinate ascent algorithm applied
+to a small, simulated data set.
+
+```{r knitr, echo=FALSE}
+knitr::opts_chunk$set(comment = "#",results = "hold",collapse = TRUE,
+                      fig.align = "center")
+```
+
+## Script parameters
+
+These are the data simulation settings.
+
+```{r datasim-params}
+n  <- 500
+p  <- 1000
+sd <- c(0,    1,    2)
+w  <- c(0.98, 0.01, 0.01)
+```
+
+This specifies the variances for the mixture-of-normals prior on the regression
+coefficients.
+
+```{r set-s0}
+s0 <- c(0.01,0.5,1)^2
+```
+
+## Load functions
+
+This R code provides a very simple implementation of the mr-ash
+algorithm.
+
+```{r load-functions}
+source("../code/misc.R")
+source("../code/mr_ash.R")
+```
+
+## Simulate data
+
+```{r simulate-data}
+set.seed(1)
+X    <- matrix(rnorm(n*p),n,p)
+k    <- sample(length(w),p,replace = TRUE,prob = w)
+beta <- sd[k] * rnorm(p)
+y    <- drop(X %*% beta + rnorm(n))
+```
+
+## Fit model
+
+These are the initial estimates of residual variance (`s`), mixture
+weights (`w0`) and posterior mean estimates of the regression
+coefficients (`b`).
+
+```{r init-model}
+b  <- rep(0,p)
+s  <- 1
+w0 <- c(0.5,0.25,0.25)
+```
+
+Fit the model by running 20 EM updates.
+
+```{r fit-model}
+fit <- mr_ash(X,y,s,s0,w0,b,20)
+```
+
+## Review model fit
+
+Compare the mr-ash estimates against the values used to simulate the
+data.
+
+```{r plot-coefs, fig.height=4.5, fig.width=4}
+plot(beta,fit$b,pch = 20,col = "black")
+abline(a = 0,b = 1,col = "skyblue",lty = "dotted",xlab = "true",
+       ylab = "estimated")
+```
+
+Plot the improvement in the model fit over time, as measured by the
+ELBO.
+
+```{r plot-progress, fig.height=4.5, fig.width=4}
+plot(max(fit$elbo) - fit$elbo + 1e-5,type = "l",col = "dodgerblue",
+     lwd = 2,log = "y",xlab = "iteration",ylab = "distance to \"best\" ELBO")
+```
