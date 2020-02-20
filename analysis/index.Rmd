@@ -1,11 +1,7 @@
 ---
 title: Algorithms for the mr-ash model
 site: workflowr::wflow_site
-output:
-  workflowr::wflow_html:
-    toc: false
-editor_options:
-  chunk_output_type: console
+output: workflowr::wflow_html
 ---
 
 Follow the links to below to review the results of my analyses.
@@ -14,5 +10,5 @@ Follow the links to below to review the results of my analyses.
 for mr-ash.](mr_ash_demo.html)
 
 + [Comparing two different ways of estimating the mr-ash mixture 
-weights](em_vs_mixsqp.html)
+weights.](em_vs_mixsqp.html)
 
