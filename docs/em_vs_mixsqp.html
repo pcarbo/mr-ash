@@ -416,18 +416,16 @@ This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcompcarbomrashtree825688b8c5de8a72a3e2066c334c4774dbd0d3catargetblank825688ba"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/pcarbo/mr-ash/tree/825688b8c5de8a72a3e2066c334c4774dbd0d3ca" target="_blank">825688b</a> </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcompcarbomrashtree1e5af9fbb7bf8837b1fb21c76e4bca23ba0ea131targetblank1e5af9fa"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/pcarbo/mr-ash/tree/1e5af9fbb7bf8837b1fb21c76e4bca23ba0ea131" target="_blank">1e5af9f</a> </a>
 </p>
 </div>
-<div id="strongRepositoryversionstrongahrefhttpsgithubcompcarbomrashtree825688b8c5de8a72a3e2066c334c4774dbd0d3catargetblank825688ba" class="panel-collapse collapse">
+<div id="strongRepositoryversionstrongahrefhttpsgithubcompcarbomrashtree1e5af9fbb7bf8837b1fb21c76e4bca23ba0ea131targetblank1e5af9fa" class="panel-collapse collapse">
 <div class="panel-body">
 <p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility. The version displayed above was the version of the Git repository at the time these results were generated. <br><br> Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
 </p>
 <pre><code>
-Unstaged changes:
-    Modified:   analysis/mr_ash_demo.Rmd
-
+working directory clean
 </code></pre>
 <p>
 Note that any generated files, e.g. HTML, png, CSS, etc., are not included in this status report because it is ok for generated content to have uncommitted changes.
@@ -470,6 +468,57 @@ Message
 Rmd
 </td>
 <td>
+<a href="https://github.com/pcarbo/mr-ash/blob/1e5af9fbb7bf8837b1fb21c76e4bca23ba0ea131/analysis/em_vs_mixsqp.Rmd" target="_blank">1e5af9f</a>
+</td>
+<td>
+Peter Carbonetto
+</td>
+<td>
+2020-02-20
+</td>
+<td>
+wflow_publish(“em_vs_mixsqp.Rmd”)
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/pcarbo/mr-ash/4cbeb369f45ea7fbf54c778c7ef6e47edbb7b967/docs/em_vs_mixsqp.html" target="_blank">4cbeb36</a>
+</td>
+<td>
+Peter Carbonetto
+</td>
+<td>
+2020-02-20
+</td>
+<td>
+Built first draft of the em_vs_mixsqp analysis.
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/pcarbo/mr-ash/38f8a381433f3c9816ef50796905a95499545f40/docs/em_vs_mixsqp.html" target="_blank">38f8a38</a>
+</td>
+<td>
+Peter Carbonetto
+</td>
+<td>
+2020-02-20
+</td>
+<td>
+Build site.
+</td>
+</tr>
+<tr>
+<td>
+Rmd
+</td>
+<td>
 <a href="https://github.com/pcarbo/mr-ash/blob/825688b8c5de8a72a3e2066c334c4774dbd0d3ca/analysis/em_vs_mixsqp.Rmd" target="_blank">825688b</a>
 </td>
 <td>
@@ -506,7 +555,7 @@ Created first draft of mr_ash_demo workflowr page.
 </div>
 </div>
 </div>
-<p>Here we compare two different ways of updating the mixture weights in mr-ash: using EM, and using mix-SQP.</p>
+<p>Here we compare two different ways of implementing the mixture weight updates in mr-ash: EM and mix-SQP.</p>
 <div id="script-parameters" class="section level2">
 <h2>Script parameters</h2>
 <p>These are the data simulation settings.</p>
@@ -515,7 +564,7 @@ Created first draft of mr_ash_demo workflowr page.
 p  &lt;- 100
 sd &lt;- c(0,   1,    2)
 w  &lt;- c(0.9, 0.05, 0.05)
-s  &lt;- 0</code></pre>
+s  &lt;- 0.4</code></pre>
 <p>This specifies the variances for the mixture-of-normals prior on the regression coefficients.</p>
 <pre class="r"><code>s0 &lt;- 10^seq(-4,0,length.out = 12)</code></pre>
 </div>
@@ -554,16 +603,16 @@ b  &lt;- rep(0,p)</code></pre>
 <pre class="r"><code>fit2 &lt;- mr_ash_with_mixsqp(X,y,se,s0,w0,b,numiter = 10,maxiter.inner = 50,
                            tol.inner = 1e-8)
 # iter                elbo max|w0-w0&#39;| niter
-#  100 -7.873409197069e+02 7.60892e-01    15
-#  100 -7.597870942033e+02 3.92902e-02    11
-#  100 -7.596906035040e+02 1.10491e-04     9
-#  100 -7.596906001827e+02 4.52321e-07     6
-#  100 -7.596906001829e+02 2.11100e-09     3
-#  100 -7.596906001829e+02 4.93716e-12     1
-#  100 -7.596906001829e+02 3.64420e-12     1
-#  100 -7.596906001829e+02 1.62259e-13     1
-#  100 -7.596906001829e+02 1.62134e-13     1
-#  100 -7.596906001829e+02 3.88856e-14     1</code></pre>
+#  100 -8.021690535907e+02 5.01698e-01    50
+#  100 -7.570995347766e+02 3.26960e-01    50
+#  100 -7.548536170925e+02 7.63157e-04    50
+#  100 -7.548532912304e+02 1.45089e-06    36
+#  100 -7.548532912275e+02 1.44478e-09     7
+#  100 -7.548532912275e+02 9.36317e-10     1
+#  100 -7.548532912275e+02 3.76350e-10     1
+#  100 -7.548532912275e+02 7.80299e-11     1
+#  100 -7.548532912275e+02 3.46504e-10     1
+#  100 -7.548532912275e+02 4.31311e-10     1</code></pre>
 </div>
 <div id="review-model-fit" class="section level2">
 <h2>Review model fit</h2>
@@ -572,18 +621,16 @@ b  &lt;- rep(0,p)</code></pre>
              aes(x = em,y = mixsqp)) +
   geom_point(color = &quot;darkblue&quot;) +
   geom_abline(intercept = 0,slope = 1,col = &quot;magenta&quot;,lty = &quot;dotted&quot;) +
-  labs(title = &quot;coefs&quot;) +
   theme_cowplot()</code></pre>
-<p><img src="figure/em_vs_mixsqp.Rmd/unnamed-chunk-1-1.png" width="288" style="display: block; margin: auto;" /></p>
+<p><img src="figure/em_vs_mixsqp.Rmd/plot-coefs-1-1.png" width="288" style="display: block; margin: auto;" /></p>
 <p>Compare the posterior mean estimates against the values used to simulate the data.</p>
 <pre class="r"><code>ggplot(data.frame(true = beta,mixsqp = fit2$b),
              aes(x = true,y = mixsqp)) +
   geom_point(color = &quot;darkblue&quot;) +
   geom_abline(intercept = 0,slope = 1,col = &quot;magenta&quot;,lty = &quot;dotted&quot;) +
-  labs(title = &quot;coefs&quot;) +
   theme_cowplot()</code></pre>
-<p><img src="figure/em_vs_mixsqp.Rmd/unnamed-chunk-2-1.png" width="288" style="display: block; margin: auto;" /></p>
-<p>Plot the improvement in the solution over time. The EM updates are shown in blue, and the mix-SQP updates are shown in orange.</p>
+<p><img src="figure/em_vs_mixsqp.Rmd/plot-coefs-2-1.png" width="288" style="display: block; margin: auto;" /></p>
+<p>Plot the improvement in the solution over time.</p>
 <pre class="r"><code>elbo.best &lt;- max(c(fit1$elbo,fit2$elbo))
 pdat      &lt;- rbind(data.frame(update = &quot;em&quot;,
                               iter   = 1:length(fit1$elbo),
@@ -597,9 +644,9 @@ ggplot(pdat,aes(x = iter,y = elbo,color = update)) +
   geom_point() +
   scale_y_log10() +
   scale_color_manual(values = c(&quot;royalblue&quot;,&quot;darkorange&quot;)) +
-  labs(y = &quot;distance to \&quot;best\&quot; elbo&quot;,title = paste(&quot;s =&quot;,s)) +
+  labs(y = &quot;distance to \&quot;best\&quot; elbo&quot;) +
   theme_cowplot()</code></pre>
-<p><img src="figure/em_vs_mixsqp.Rmd/unnamed-chunk-3-1.png" width="384" style="display: block; margin: auto;" /></p>
+<p><img src="figure/em_vs_mixsqp.Rmd/plot-progress-1.png" width="480" style="display: block; margin: auto;" /></p>
 <br>
 <p>
 <button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
