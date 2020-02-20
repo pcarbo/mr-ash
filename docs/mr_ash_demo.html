@@ -416,16 +416,18 @@ This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcompcarbomrashtree12ad071637d18b09f6c3c02dfcf5f084148083e8targetblank12ad071a"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/pcarbo/mr-ash/tree/12ad071637d18b09f6c3c02dfcf5f084148083e8" target="_blank">12ad071</a> </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcompcarbomrashtreea255a44f07708d0cb38bad6540d157a0346ad740targetblanka255a44a"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/pcarbo/mr-ash/tree/a255a44f07708d0cb38bad6540d157a0346ad740" target="_blank">a255a44</a> </a>
 </p>
 </div>
-<div id="strongRepositoryversionstrongahrefhttpsgithubcompcarbomrashtree12ad071637d18b09f6c3c02dfcf5f084148083e8targetblank12ad071a" class="panel-collapse collapse">
+<div id="strongRepositoryversionstrongahrefhttpsgithubcompcarbomrashtreea255a44f07708d0cb38bad6540d157a0346ad740targetblanka255a44a" class="panel-collapse collapse">
 <div class="panel-body">
 <p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility. The version displayed above was the version of the Git repository at the time these results were generated. <br><br> Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
 </p>
 <pre><code>
-working directory clean
+Unstaged changes:
+    Modified:   analysis/em_vs_mixsqp.Rmd
+
 </code></pre>
 <p>
 Note that any generated files, e.g. HTML, png, CSS, etc., are not included in this status report because it is ok for generated content to have uncommitted changes.
@@ -463,6 +465,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/pcarbo/mr-ash/blob/a255a44f07708d0cb38bad6540d157a0346ad740/analysis/mr_ash_demo.Rmd" target="_blank">a255a44</a>
+</td>
+<td>
+Peter Carbonetto
+</td>
+<td>
+2020-02-20
+</td>
+<td>
+wflow_publish(“mr_ash_demo.Rmd”)
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/pcarbo/mr-ash/582e465858267f4a7583a8c58867cf8e06ed093d/docs/mr_ash_demo.html" target="_blank">582e465</a>
+</td>
+<td>
+Peter Carbonetto
+</td>
+<td>
+2020-02-20
+</td>
+<td>
+Created first draft of mr_ash_demo workflowr page.
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -549,10 +585,84 @@ w0 &lt;- c(0.5,0.25,0.25)</code></pre>
 abline(a = 0,b = 1,col = &quot;skyblue&quot;,lty = &quot;dotted&quot;,xlab = &quot;true&quot;,
        ylab = &quot;estimated&quot;)</code></pre>
 <p><img src="figure/mr_ash_demo.Rmd/plot-coefs-1.png" width="384" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-plot-coefs-1">
+Past versions of plot-coefs-1.png
+</button>
+</p>
+<div id="fig-plot-coefs-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/pcarbo/mr-ash/blob/582e465858267f4a7583a8c58867cf8e06ed093d/docs/figure/mr_ash_demo.Rmd/plot-coefs-1.png" target="_blank">582e465</a>
+</td>
+<td>
+Peter Carbonetto
+</td>
+<td>
+2020-02-20
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <p>Plot the improvement in the model fit over time, as measured by the ELBO.</p>
 <pre class="r"><code>plot(max(fit$elbo) - fit$elbo + 1e-5,type = &quot;l&quot;,col = &quot;dodgerblue&quot;,
      lwd = 2,log = &quot;y&quot;,xlab = &quot;iteration&quot;,ylab = &quot;distance to \&quot;best\&quot; ELBO&quot;)</code></pre>
 <p><img src="figure/mr_ash_demo.Rmd/plot-progress-1.png" width="384" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-plot-progress-1">
+Past versions of plot-progress-1.png
+</button>
+</p>
+<div id="fig-plot-progress-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/pcarbo/mr-ash/blob/582e465858267f4a7583a8c58867cf8e06ed093d/docs/figure/mr_ash_demo.Rmd/plot-progress-1.png" target="_blank">582e465</a>
+</td>
+<td>
+Peter Carbonetto
+</td>
+<td>
+2020-02-20
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <br>
 <p>
 <button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
