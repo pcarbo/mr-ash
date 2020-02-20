@@ -9,11 +9,15 @@ source("../code/mr_ash.R")
 # SCRIPT PARAMETERS
 # ----------------
 # Data simulation settings.
+#
+# Suggestion: Try setting "s" to zero (all predictors are independent)
+# and 0.4 (correlation between all predictors is 0.4).
+#
 n  <- 500
 p  <- 100
 sd <- c(0,   1,    2)
 w  <- c(0.9, 0.05, 0.05)
-s  <- 0.5
+s  <- 0.4
 
 # Variances for the mixture-of-normals prior on the regression
 # coefficients.
@@ -41,18 +45,23 @@ y       <- drop(X %*% beta + rnorm(n))
 # weights (w0), and posterior mean estimates of the regression
 # coefficients (b).
 k   <- length(s0)
-s   <- 1
+se  <- 1
 w0  <- rep(1/k,k)
 b   <- rep(0,p)
 
+# Running 20 EM updates to "pre-fit" the model.
+cat("Pre-fitting model by running 20 EM updates.\n")
+fit0 <- mr_ash(X,y,se,s0,w0,b,maxiter = 20,verbose = FALSE)
+
 # Fit the model by running 100 EM updates.
 cat("Running EM updates.\n")
-fit1 <- mr_ash(X,y,s,s0,w0,b,maxiter = 500,verbose = FALSE)
+fit1 <- mr_ash(X,y,fit0$se,s0,fit0$w0,fit0$b,maxiter = 500,verbose = FALSE)
 
 # Fit the model a second time using the "accelerated" mix-SQP updates
 # for the mixture weights.
 cat("Running 10 mix-SQP updates.\n")
-fit2 <- mr_ash_with_mixsqp(X,y,s,s0,w0,b,numiter = 10,tol.inner = 1e-4)
+fit2 <- mr_ash_with_mixsqp(X,y,fit0$se,s0,fit0$w0,fit0$b,numiter = 10,
+                           tol.inner = 1e-8)
 
 # REVIEW FITS
 # -----------
@@ -76,7 +85,7 @@ pdat      <- rbind(data.frame(update = "em",
                    data.frame(update = "mixsqp",
                               iter   = cumsum(fit2$niter),
                               elbo   = fit2$elbo))
-pdat$elbo <- elbo.best - pdat$elbo + 1e-8
+pdat$elbo <- elbo.best - pdat$elbo + 0.01
 p3 <- ggplot(pdat,aes(x = iter,y = elbo,color = update)) +
   geom_line() +
   geom_point() +
