@@ -1,5 +1,5 @@
-# A demonstration of the mr_ash algorithm with mix-SQP updates of the
-# mixture weights.
+# Here we compare two different ways of updating the mixture weights
+# in mr-ash: using EM, and using mix-SQP.
 library(ggplot2)
 library(cowplot)
 library(MASS)
@@ -62,7 +62,6 @@ fit2 <- mr_ash_with_mixsqp(X,y,se,s0,w0,b,numiter = 10,maxiter.inner = 50,
 
 # REVIEW FITS
 # -----------
-
 # Plot the improvement in the solution over time. The EM updates are
 # shown in blue, and the mix-SQP updates are shown in orange.
 elbo.best <- max(c(fit1$elbo,fit2$elbo))
