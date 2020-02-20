@@ -1,17 +1,14 @@
-name: "mr-ash"
+name: mr-ash
 output_dir: ../docs
 navbar:
-  title: "mr-ash"
-  left:
-  - text: Home
-    href: index.html
-  - text: About
-    href: about.html
-  - text: License
-    href: license.html
+  title: mr-ash
+  right:
+    - text: source
+      href: https://github.com/pcarbo/mr-ash
 output:
   workflowr::wflow_html:
-    toc: yes
-    toc_float: yes
-    theme: cosmo
+    toc: no
+    theme: readable
     highlight: textmate
+    code_folding: none
+    self_contained: no
