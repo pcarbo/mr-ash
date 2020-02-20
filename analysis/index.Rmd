@@ -1,5 +1,5 @@
 ---
-title: "Home"
+title: Algorithms for the mr-ash model
 site: workflowr::wflow_site
 output:
   workflowr::wflow_html:
@@ -8,4 +8,11 @@ editor_options:
   chunk_output_type: console
 ---
 
-Welcome to my research website.
+Follow the links to below to review the results of my analyses.
+
++ [Small demonstration of the very simple co-ordinate ascent algorithm 
+for mr-ash.](mr_ash_demo.html)
+
++ [Comparing two different ways of estimating the mr-ash mixture 
+weights](em_vs_mixsqp.html)
+
