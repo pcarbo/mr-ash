@@ -1,4 +1,6 @@
 # TO DO: Explain here what this script does, and how to use it.
+library(ggplot2)
+library(cowplot)
 source("../code/misc.R")
 source("../code/mr_ash.R")
 
@@ -40,15 +42,31 @@ fit1 <- mr_ash(X,y,s,s0,w0,b,100)
 # for the mixture weights.
 fit2 <- mr_ash_with_mixsqp(X,y,s,s0,s0,b,10)
 
-stop()
-
 # REVIEW FITS
 # -----------
 # Compare the posterior mean estimates against the values used to
 # simulate the data.
-plot(beta,fit$b,pch = 20,col = "black")
-abline(a = 0,b = 1,col = "skyblue",lty = "dotted")
+quickplot(beta,fit1$b) +
+  geom_abline(intercept = 0,slope = 1,col = "skyblue",lty = "dotted") +
+  theme_cowplot()
+
+# Compare the posterior mean estimates from the two fits.
+quickplot(fit1$b,fit2$b) +
+  geom_abline(intercept = 0,slope = 1,col = "skyblue",lty = "dotted") +
+  theme_cowplot()
 
 # Plot the improvement in the solution over time.
-plot(max(fit$elbo) - fit$elbo + 1e-8,type = "l",col = "dodgerblue",
-     lwd = 2,log = "y",xlab = "iteration",ylab = "distance to best ELBO")
+elbo.best <- max(c(fit1$elbo,fit2$elbo))
+pdat      <- rbind(data.frame(update = "em",
+                              iter   = 1:length(fit1$elbo),
+                              elbo   = fit1$elbo),
+                   data.frame(update = "mixsqp",
+                              iter   = cumsum(fit2$niter),
+                              elbo   = fit2$elbo))
+pdat$elbo <- elbo.best - pdat$elbo + 1e-8
+ggplot(pdat,aes(x = iter,y = elbo,color = update)) +
+  geom_line() +
+  geom_point() +
+  scale_y_log10() +
+  scale_color_manual(values = c("darkblue","darkorange")) +
+  theme_cowplot()

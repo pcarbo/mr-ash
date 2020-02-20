@@ -1,7 +1,7 @@
 # TO DO: Explain here what this function does.
 mr_ash_with_mixsqp <- function (X, y, se, s0, w0, b, numiter = 10,
                                 update.s0 = TRUE, maxiter.inner.loop = 100,
-                                tol.inner.loop = 1e-6) {
+                                tol.inner.loop = 1e-8) {
 
   # Get the number of predictors (p) and the number of mixture
   # components in the prior (k).
@@ -18,11 +18,13 @@ mr_ash_with_mixsqp <- function (X, y, se, s0, w0, b, numiter = 10,
   
   # These two variables are used to keep track of the algorithm's
   # progress: "elbo" stores the value of the objective (the
-  # variational lower bound, or "ELBO") at each iteration; "maxd"
-  # stores the largest difference in the mixture weights between two
-  # successive iterations.
-  elbo <- rep(0,numiter)
-  maxd <- rep(0,numiter)
+  # variational lower bound, or "ELBO") at each iteration; "niter"
+  # stores the number of inner-loop iterations performed at eacch
+  # outer-loop iteration; and "maxd" stores the largest difference in
+  # the mixture weights between two successive iterations.
+  elbo  <- rep(0,numiter)
+  niter <- rep(0,numiter)
+  maxd  <- rep(0,numiter)
 
   # Iterate the mix-SQP updates.
   for (iter in 1:numiter) {
@@ -32,9 +34,10 @@ mr_ash_with_mixsqp <- function (X, y, se, s0, w0, b, numiter = 10,
     out        <- mr_ash(X,y,se,s0,w0,b,numiter = maxiter.inner.loop,
                          tol = tol.inner.loop,update.s0 = update.s0,
                          update.w0 = FALSE)
-    se         <- out$se
-    b          <- out$b
-    elbo[iter] <- max(out$elbo)
+    se          <- out$se
+    b           <- out$b
+    elbo[iter]  <- max(out$elbo)
+    niter[iter] <- length(out$elbo)
 
     # Compute the p x k matrix of log-likelihoods conditional on each
     # prior mixture component.
@@ -48,13 +51,16 @@ mr_ash_with_mixsqp <- function (X, y, se, s0, w0, b, numiter = 10,
   # Return the updated posterior means of the regression coefficicents
   # ("b"), the updated mixture weights ("w0"), the updated residual
   # variance ("se"), the value of the objective after running each
-  # outer-loop iteration ("elbo"), and the maximum change in the
-  # mixture weights at each outer-loop iteration ("maxd").
-  return(list(b    = b,
-              w0   = w0,
-              se   = se,
-              elbo = elbo[1:i],
-              maxd = maxd[1:i]))
+  # outer-loop iteration ("elbo"), the maximum change in the mixture
+  # weights at each outer-loop iteration ("maxd"), and the number of
+  # inner-loop iterations performed for each outer-loop iteration
+  # ("niter").
+  return(list(b     = b,
+              w0    = w0,
+              se    = se,
+              elbo  = elbo,
+              maxd  = maxd,
+              niter = niter))
 }
 
 # Perform EM updates for the mr-ash model.
