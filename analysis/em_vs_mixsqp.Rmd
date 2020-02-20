@@ -6,8 +6,8 @@ site: workflowr::wflow_site
 output: workflowr::wflow_html
 ---
 
-Here we compare two different ways of updating the mixture weights
-in mr-ash: using EM, and using mix-SQP.
+Here we compare two different ways of implementing the mixture weight updates
+in mr-ash: EM and mix-SQP.
 
 ```{r knitr, echo=FALSE}
 knitr::opts_chunk$set(comment = "#",results = "hold",collapse = TRUE,
@@ -27,7 +27,7 @@ n  <- 500
 p  <- 100
 sd <- c(0,   1,    2)
 w  <- c(0.9, 0.05, 0.05)
-s  <- 0
+s  <- 0.4
 ```
 
 This specifies the variances for the mixture-of-normals prior on the
@@ -105,31 +105,28 @@ fit2 <- mr_ash_with_mixsqp(X,y,se,s0,w0,b,numiter = 10,maxiter.inner = 50,
 
 Compare the posterior mean estimates from the two fits.
 
-```{r, fig.height=3, fig.width=3}
+```{r plot-coefs-1, fig.height=3, fig.width=3}
 ggplot(data.frame(em = fit1$b,mixsqp = fit2$b),
              aes(x = em,y = mixsqp)) +
   geom_point(color = "darkblue") +
   geom_abline(intercept = 0,slope = 1,col = "magenta",lty = "dotted") +
-  labs(title = "coefs") +
   theme_cowplot()
 ```
 
 Compare the posterior mean estimates against the values used to
 simulate the data.
 
-```{r, fig.height=3, fig.width=3}
+```{r plot-coefs-2, fig.height=3, fig.width=3}
 ggplot(data.frame(true = beta,mixsqp = fit2$b),
              aes(x = true,y = mixsqp)) +
   geom_point(color = "darkblue") +
   geom_abline(intercept = 0,slope = 1,col = "magenta",lty = "dotted") +
-  labs(title = "coefs") +
   theme_cowplot()
 ```
 
-Plot the improvement in the solution over time. The EM updates are
-shown in blue, and the mix-SQP updates are shown in orange.
+Plot the improvement in the solution over time.
 
-```{r fig.height=4, fig.width=4}
+```{r plot-progress, fig.height=4, fig.width=5}
 elbo.best <- max(c(fit1$elbo,fit2$elbo))
 pdat      <- rbind(data.frame(update = "em",
                               iter   = 1:length(fit1$elbo),
@@ -143,6 +140,6 @@ ggplot(pdat,aes(x = iter,y = elbo,color = update)) +
   geom_point() +
   scale_y_log10() +
   scale_color_manual(values = c("royalblue","darkorange")) +
-  labs(y = "distance to \"best\" elbo",title = paste("s =",s)) +
+  labs(y = "distance to \"best\" elbo") +
   theme_cowplot()
 ```
