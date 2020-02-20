@@ -1,4 +1,10 @@
-# TO DO: Explain here what this function does.
+# Fit the mr-ash model, in which the "naive" M-step updates for the
+# mixture weights are replaced by a mix-SQP update.
+#
+# This implementation is meant to be "instructive"---that is, I've
+# tried to make the code as simple as possible, with an emphasis on
+# clarity. Very little effort has been devoted to making the
+# implementation efficient, or the code concise.
 mr_ash_with_mixsqp <- function (X, y, se, s0, w0, b, numiter = 10,
                                 update.s0 = TRUE, maxiter.inner = 100,
                                 tol.inner = 1e-8, verbose = TRUE) {
