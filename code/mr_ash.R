@@ -1,3 +1,62 @@
+# TO DO: Explain here what this function does.
+mr_ash_with_mixsqp <- function (X, y, se, s0, w0, b, numiter = 10,
+                                update.s0 = TRUE, maxiter.inner.loop = 100,
+                                tol.inner.loop = 1e-6) {
+
+  # Get the number of predictors (p) and the number of mixture
+  # components in the prior (k).
+  p <- length(b)
+  k <- length(w0)
+  
+  # Center X and y.
+  X <- scale(X,scale = FALSE)
+  y <- y - mean(y)
+
+  # This is the p x k matrix that will be used to store the
+  # conditional log-likelihoods provided as input to mixsqp.
+  L <- matrix(0,p,k)
+  
+  # These two variables are used to keep track of the algorithm's
+  # progress: "elbo" stores the value of the objective (the
+  # variational lower bound, or "ELBO") at each iteration; "maxd"
+  # stores the largest difference in the mixture weights between two
+  # successive iterations.
+  elbo <- rep(0,numiter)
+  maxd <- rep(0,numiter)
+
+  # Iterate the mix-SQP updates.
+  for (iter in 1:numiter) {
+
+    # Update the residual variance (se) and the posterior mean estimates
+    # of the coefficients (b).
+    out        <- mr_ash(X,y,se,s0,w0,b,numiter = maxiter.inner.loop,
+                         tol = tol.inner.loop,update.s0 = update.s0,
+                         update.w0 = FALSE)
+    se         <- out$se
+    b          <- out$b
+    elbo[iter] <- max(out$elbo)
+
+    # Compute the p x k matrix of log-likelihoods conditional on each
+    # prior mixture component.
+    r <- drop(y - X %*% b)
+    for (i in 1:p) 
+      for (j in 1:k)
+        L[i,j] <- bayes_lr_ridge(X[,i],r + X[,i]*b[i],se,s0[j])$logbf
+    w0 <- mixsqp(L,log = TRUE,control = list(verbose = FALSE,eps = 1e-6))$x
+  }
+
+  # Return the updated posterior means of the regression coefficicents
+  # ("b"), the updated mixture weights ("w0"), the updated residual
+  # variance ("se"), the value of the objective after running each
+  # outer-loop iteration ("elbo"), and the maximum change in the
+  # mixture weights at each outer-loop iteration ("maxd").
+  return(list(b    = b,
+              w0   = w0,
+              se   = se,
+              elbo = elbo[1:i],
+              maxd = maxd[1:i]))
+}
+
 # Perform EM updates for the mr-ash model.
 #
 # This implementation is meant to be "instructive"---that is, I've
@@ -5,7 +64,7 @@
 # clarity. Very little effort has been devoted to making the
 # implementation efficient, or the code concise.
 mr_ash <- function (X, y, se, s0, w0, b, numiter = 100, tol = 1e-8,
-                    update.w0 = TRUE) {
+                    update.s0 = TRUE, update.w0 = TRUE) {
 
   # Center X and y.
   X <- scale(X,scale = FALSE)
@@ -14,7 +73,7 @@ mr_ash <- function (X, y, se, s0, w0, b, numiter = 100, tol = 1e-8,
   # These two variables are used to keep track of the algorithm's
   # progress: "elbo" stores the value of the objective (the
   # variational lower bound, or "ELBO") at each iteration; "maxd"
-  # stores the largest different in the posterior mean coefficients
+  # stores the largest difference in the posterior mean coefficients
   # between two successive iterations.
   elbo <- rep(as.numeric(NA),numiter)
   maxd <- rep(as.numeric(NA),numiter)
@@ -38,8 +97,9 @@ mr_ash <- function (X, y, se, s0, w0, b, numiter = 100, tol = 1e-8,
 
     # M STEP
     # ------
-    # Update the residual variance.
-    se <- out$erss/n
+    # Update the residual variance, if requested.
+    if (update.s0)
+      se <- out$erss/n
     
     # Update the mixture weights, if requested.
     if (update.w0)
