@@ -203,17 +203,17 @@ mr_ash_update <- function (X, y, b, se, s0, w0) {
     # Calculate the ith term in the "sum of variances" for the ELBO.
     v <- norm2(x)^2 * out$s1
     
+    # Update the expected residuals.
+    r <- r - x*b[i]
+    
     # Compute the expected residual sum of of squares (erssi) for the
     # linear regression r = xi*bi + e, and the KL-divergence between
     # the posterior and prior distributions of the regression
     # coefficient for the ith predictor.
-    erssi <- norm2(r - x*b[i])^2 + v
+    erssi <- norm2(r)^2 + v
     d     <- elbo_const - (out$logbf + out$loglik0 + erssi/(2*se))
     elbo  <- elbo - d
     erss  <- erss + v
-    
-    # Update the expected residuals.
-    r <- r - x*b[i]
   }
 
   # Complete the computation of the expected residual sum of squares
