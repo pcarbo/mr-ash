@@ -5,7 +5,7 @@ source("../code/mr_ash.R")
 
 # Script settings.
 n  <- 100
-p  <- 1000
+p  <- 400
 sd <- c(0,   1,    2)
 w  <- c(0.9, 0.05, 0.05)
 s  <- 0.1
@@ -26,5 +26,4 @@ b  <- rep(0,p)
 
 # Fit model.
 fit1 <- mr_ash(X,y,se,s0,w0,b,maxiter = 200,verbose = TRUE)
-fit2 <- mr_ash_with_mixsqp(X,y,se,s0,w0,b,numiter = 10,maxiter.inner = 50,
-                           tol.inner = 1e-8)
+fit2 <- mr_ash_with_mixsqp(X,y,se = fit1$se,s0,w0,b,numiter = 10)

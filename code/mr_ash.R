@@ -42,8 +42,8 @@ mr_ash_with_mixsqp <- function (X, y, se, s0, w0, b, numiter = 10,
 
     # Update the residual variance (se) and the posterior mean estimates
     # of the coefficients (b).
-    out <- mr_ash(X,y,se,s0,w0,b,maxiter.inner,tol.inner,update.se,
-                  update.w0 = FALSE,verbose = FALSE)
+    out <- mr_ash(X,y,se,s0,w0,b,maxiter.inner,tol.inner,
+                  update.se,update.w0 = FALSE,verbose = FALSE)
     se  <- out$se
     b   <- out$b
 
@@ -54,7 +54,7 @@ mr_ash_with_mixsqp <- function (X, y, se, s0, w0, b, numiter = 10,
       for (j in 1:k)
         L[i,j] <- bayes_lr_ridge(X[,i],r + X[,i]*b[i],se,s0[j])$logbf
     w0 <- mixsqp(L,log = TRUE,control = list(verbose = FALSE,eps = 1e-6))$x
-
+    
     # Record the algorithm's progress.
     elbo[iter]  <- max(out$elbo)
     maxd[iter]  <- max(abs(w0 - w00))
@@ -67,13 +67,14 @@ mr_ash_with_mixsqp <- function (X, y, se, s0, w0, b, numiter = 10,
   }
 
   # Return the updated posterior means of the regression coefficicents
-  # ("b"), the updated mixture weights ("w0"), the updated residual
-  # variance ("se"), the value of the objective after running each
-  # outer-loop iteration ("elbo"), the maximum change in the mixture
-  # weights at each outer-loop iteration ("maxd"), and the number of
-  # inner-loop iterations performed for each outer-loop iteration
-  # ("niter").
+  # ("b"), the prior variances of the mixture components ("s0"), the
+  # updated mixture weights ("w0"), the updated residual variance
+  # ("se"), the value of the objective after running each outer-loop
+  # iteration ("elbo"), the maximum change in the mixture weights at
+  # each outer-loop iteration ("maxd"), and the number of inner-loop
+  # iterations performed for each outer-loop iteration ("niter").
   return(list(b     = b,
+              s0    = s0,
               w0    = w0,
               se    = se,
               elbo  = elbo,
@@ -142,11 +143,13 @@ mr_ash <- function (X, y, se, s0, w0, b, maxiter = 100, tol = 1e-8,
   } 
 
   # Return the updated posterior means of the regression coefficicents
-  # ("b"), the updated mixture weights ("w0"), the updated residual
-  # variance ("se"), the value of the objective after the
-  # (approximate) E-step at each iteration ("elbo"), and the maximum
-  # change in the regression coefficients at each iteration ("maxd").
+  # ("b"), the prior variances of the mixture components ("s0"), the
+  # updated mixture weights ("w0"), the updated residual variance
+  # ("se"), the value of the objective after the (approximate) E-step
+  # at each iteration ("elbo"), and the maximum change in the
+  # regression coefficients at each iteration ("maxd").
   return(list(b    = b,
+              s0   = s0,
               w0   = w0,
               se   = se,
               elbo = elbo[1:i],
@@ -172,15 +175,14 @@ mr_ash_update <- function (X, y, b, se, s0, w0) {
   # mixture-of-normals.
   w0.em <- rep(0,k)
 
-  # These two variables are used to store the sum-of-variances term
-  # ("v") and Kullback-Leibler divergence term ("d") in the expression
-  # for the ELBO.
-  v <- 0
-  d <- 0
-  
-  # Compute the term in the ELBO that does not change as the
-  # variational approximation is updated.
+  # Initialize two variables which will contain the expected residual
+  # sum of squares (erss) and the variational lower bound (elbo) upon
+  # completion of the loop. Also, store the term in the varaiationaal
+  # lower bound that does not change as the variational approximation
+  # is updated during the loop (elbo_const).
   elbo_const <- -n*log(2*pi*se)/2
+  elbo       <- elbo_const
+  erss       <- 0
   
   # Compute the expected residuals.
   r <- drop(y - X %*% b)
@@ -199,25 +201,25 @@ mr_ash_update <- function (X, y, b, se, s0, w0) {
     w0.em <- w0.em + out$w1
 
     # Calculate the ith term in the "sum of variances" for the ELBO.
-    vi <- norm2(x)^2 * out$s1
-    v  <- v + vi
+    v <- norm2(x)^2 * out$s1
     
-    # Compute the expected residual sum of of squares (erss) for the
+    # Compute the expected residual sum of of squares (erssi) for the
     # linear regression r = xi*bi + e, and the KL-divergence between
     # the posterior and prior distributions of the regression
     # coefficient for the ith predictor.
-    erss <- norm2(r - x*b[i])^2 + vi
-    di   <- elbo_const - (out$logbf + out$loglik0 + erss/(2*se))
-    d    <- d + di
+    erssi <- norm2(r - x*b[i])^2 + v
+    d     <- elbo_const - (out$logbf + out$loglik0 + erssi/(2*se))
+    elbo  <- elbo - d
+    erss  <- erss + v
     
     # Update the expected residuals.
     r <- r - x*b[i]
   }
 
-  # Compute the expected residual sum of squares (erss) and the
-  # variational lower bound (elbo).
-  erss <- norm2(r)^2 + v
-  elbo <- elbo_const - erss/(2*se) - d
+  # Complete the computation of the expected residual sum of squares
+  # (erss) and the variational lower bound (elbo).
+  erss <- erss + norm2(r)^2
+  elbo <- elbo - erss/(2*se)
   
   # Output the updated posterior mean coefficients ("b"), the M-step
   # update for the mixture weights ("w0.em"), the updated variational
