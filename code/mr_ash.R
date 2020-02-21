@@ -34,7 +34,7 @@ mr_ash_with_mixsqp <- function (X, y, se, s0, w0, b, numiter = 10,
 
   # Iterate the mix-SQP updates.
   if (verbose)
-    cat("iter                elbo max|w0-w0'| niter\n")
+    cat("iter                elbo max|b-b'| max|w0-w0'| niter\n")
   for (iter in 1:numiter) {
 
     # Save the current estimates of the mixture weights.
@@ -62,8 +62,8 @@ mr_ash_with_mixsqp <- function (X, y, se, s0, w0, b, numiter = 10,
 
     # Report progress, if requested.
     if (verbose)
-      cat(sprintf("%4d %0.12e %0.5e %5d\n",i,elbo[iter],maxd[iter],
-                  niter[iter]))
+      cat(sprintf("%4d %0.12e %0.3e %0.5e %5d\n",i,elbo[iter],
+                  out$maxd[niter[iter]],maxd[iter],niter[iter]))
   }
 
   # Return the updated posterior means of the regression coefficicents
