@@ -6,7 +6,7 @@
 # clarity. Very little effort has been devoted to making the
 # implementation efficient, or the code concise.
 mr_ash_with_mixsqp <- function (X, y, se, s0, w0, b, numiter = 10,
-                                update.s0 = TRUE, maxiter.inner = 100,
+                                update.se = TRUE, maxiter.inner = 100,
                                 tol.inner = 1e-8, verbose = TRUE) {
 
   # Get the number of predictors (p) and the number of mixture
@@ -42,7 +42,7 @@ mr_ash_with_mixsqp <- function (X, y, se, s0, w0, b, numiter = 10,
 
     # Update the residual variance (se) and the posterior mean estimates
     # of the coefficients (b).
-    out <- mr_ash(X,y,se,s0,w0,b,maxiter.inner,tol.inner,update.s0,
+    out <- mr_ash(X,y,se,s0,w0,b,maxiter.inner,tol.inner,update.se,
                   update.w0 = FALSE,verbose = FALSE)
     se  <- out$se
     b   <- out$b
@@ -88,7 +88,7 @@ mr_ash_with_mixsqp <- function (X, y, se, s0, w0, b, numiter = 10,
 # clarity. Very little effort has been devoted to making the
 # implementation efficient, or the code concise.
 mr_ash <- function (X, y, se, s0, w0, b, maxiter = 100, tol = 1e-8,
-                    update.s0 = TRUE, update.w0 = TRUE, verbose = TRUE) {
+                    update.se = TRUE, update.w0 = TRUE, verbose = TRUE) {
 
   # Center X and y.
   X <- scale(X,scale = FALSE)
@@ -124,7 +124,7 @@ mr_ash <- function (X, y, se, s0, w0, b, maxiter = 100, tol = 1e-8,
     # M STEP
     # ------
     # Update the residual variance, if requested.
-    if (update.s0)
+    if (update.se)
       se <- out$erss/n
     
     # Update the mixture weights, if requested.
