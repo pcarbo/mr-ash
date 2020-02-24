@@ -18,16 +18,12 @@ knitr::opts_chunk$set(comment = "#",results = "hold",collapse = TRUE,
 
 These are the data simulation settings.
 
-I suggest trying this example with `s = 0` (all predictors are
-independent) and `s = 0.4` (the correlation between all predictors
-is 0.4).
-
 ```{r datasim-params}
-n  <- 500
-p  <- 100
+n  <- 100
+p  <- 400
 sd <- c(0,   1,    2)
 w  <- c(0.9, 0.05, 0.05)
-s  <- 0.4
+s  <- 0.1
 ```
 
 This specifies the variances for the mixture-of-normals prior on the
@@ -54,6 +50,7 @@ algorithm.
 ```{r load-functions}
 source("../code/misc.R")
 source("../code/mr_ash.R")
+source("../code/mr_ash_with_mixsqp.R")
 ```
 
 ## Simulate data
@@ -97,8 +94,7 @@ Fit the model a second time using the mix-SQP updates for the mixture
 weights.
 
 ```{r fit-model-mixsqp}
-fit2 <- mr_ash_with_mixsqp(X,y,se,s0,w0,b,numiter = 10,maxiter.inner = 50,
-                           tol.inner = 1e-8)
+fit2 <- mr_ash_with_mixsqp(X,y,se,s0,w0,b,numiter = 10)
 ```
 
 ## Review model fit
@@ -132,7 +128,7 @@ pdat      <- rbind(data.frame(update = "em",
                               iter   = 1:length(fit1$elbo),
                               elbo   = fit1$elbo),
                    data.frame(update = "mixsqp",
-                              iter   = cumsum(fit2$niter),
+                              iter   = cumsum(fit2$numem),
                               elbo   = fit2$elbo))
 pdat$elbo <- elbo.best - pdat$elbo + 1e-4
 ggplot(pdat,aes(x = iter,y = elbo,color = update)) +

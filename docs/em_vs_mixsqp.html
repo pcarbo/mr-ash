@@ -307,7 +307,7 @@ div.section {
 
 <p>
 <button type="button" class="btn btn-default btn-workflowr btn-workflowr-report" data-toggle="collapse" data-target="#workflowr-report">
-<span class="glyphicon glyphicon-list" aria-hidden="true"></span> workflowr <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
+<span class="glyphicon glyphicon-list" aria-hidden="true"></span> workflowr <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span>
 </button>
 </p>
 <div id="workflowr-report" class="collapse">
@@ -316,7 +316,7 @@ div.section {
 <a data-toggle="tab" href="#summary">Summary</a>
 </li>
 <li>
-<a data-toggle="tab" href="#checks"> Checks <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> </a>
+<a data-toggle="tab" href="#checks"> Checks <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> </a>
 </li>
 <li>
 <a data-toggle="tab" href="#versions">Past versions</a>
@@ -325,10 +325,10 @@ div.section {
 <div class="tab-content">
 <div id="summary" class="tab-pane fade in active">
 <p>
-<strong>Last updated:</strong> 2020-02-20
+<strong>Last updated:</strong> 2020-02-24
 </p>
 <p>
-<strong>Checks:</strong> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 7 <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> 0
+<strong>Checks:</strong> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 6 <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> 1
 </p>
 <p>
 <strong>Knit directory:</strong> <code>mr-ash/analysis/</code> <span class="glyphicon glyphicon-question-sign" aria-hidden="true" title="This is the local directory in which the code in this file was executed."> </span>
@@ -344,12 +344,12 @@ This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRMarkdownfilestronguptodate"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>R Markdown file:</strong> up-to-date </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRMarkdownfilestronguncommittedchanges"> <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> <strong>R Markdown file:</strong> uncommitted changes </a>
 </p>
 </div>
-<div id="strongRMarkdownfilestronguptodate" class="panel-collapse collapse">
+<div id="strongRMarkdownfilestronguncommittedchanges" class="panel-collapse collapse">
 <div class="panel-body">
-<p>Great! Since the R Markdown file has been committed to the Git repository, you know the exact version of the code that produced these results.</p>
+<p>The R Markdown file has unstaged changes. To know which version of the R Markdown file created these results, you’ll want to first commit it to the Git repo. If you’re still working on the analysis, you can ignore this warning. When you’re finished, you can run <code>wflow_publish</code> to commit the R Markdown file and build the HTML.</p>
 </div>
 </div>
 </div>
@@ -416,16 +416,20 @@ This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcompcarbomrashtree1e5af9fbb7bf8837b1fb21c76e4bca23ba0ea131targetblank1e5af9fa"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/pcarbo/mr-ash/tree/1e5af9fbb7bf8837b1fb21c76e4bca23ba0ea131" target="_blank">1e5af9f</a> </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcompcarbomrashtreeb4e18a917177fec250d5232ff8549cc233d5af19targetblankb4e18a9a"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/pcarbo/mr-ash/tree/b4e18a917177fec250d5232ff8549cc233d5af19" target="_blank">b4e18a9</a> </a>
 </p>
 </div>
-<div id="strongRepositoryversionstrongahrefhttpsgithubcompcarbomrashtree1e5af9fbb7bf8837b1fb21c76e4bca23ba0ea131targetblank1e5af9fa" class="panel-collapse collapse">
+<div id="strongRepositoryversionstrongahrefhttpsgithubcompcarbomrashtreeb4e18a917177fec250d5232ff8549cc233d5af19targetblankb4e18a9a" class="panel-collapse collapse">
 <div class="panel-body">
 <p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility. The version displayed above was the version of the Git repository at the time these results were generated. <br><br> Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
 </p>
 <pre><code>
-working directory clean
+Unstaged changes:
+    Modified:   analysis/em_vs_mixsqp.Rmd
+    Modified:   code/mr_ash.R
+    Modified:   code/mr_ash_with_mixsqp.R
+
 </code></pre>
 <p>
 Note that any generated files, e.g. HTML, png, CSS, etc., are not included in this status report because it is ok for generated content to have uncommitted changes.
@@ -463,6 +467,23 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/pcarbo/mr-ash/23ad0c275b69250fed672fb7dc1d0a76a7417711/docs/em_vs_mixsqp.html" target="_blank">23ad0c2</a>
+</td>
+<td>
+Peter Carbonetto
+</td>
+<td>
+2020-02-20
+</td>
+<td>
+Made a few adjustments to the plots in the em_vs_mixsqp analysis.
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -560,11 +581,11 @@ Created first draft of mr_ash_demo workflowr page.
 <h2>Script parameters</h2>
 <p>These are the data simulation settings.</p>
 <p>I suggest trying this example with <code>s = 0</code> (all predictors are independent) and <code>s = 0.4</code> (the correlation between all predictors is 0.4).</p>
-<pre class="r"><code>n  &lt;- 500
-p  &lt;- 100
+<pre class="r"><code>n  &lt;- 100
+p  &lt;- 400
 sd &lt;- c(0,   1,    2)
 w  &lt;- c(0.9, 0.05, 0.05)
-s  &lt;- 0.4</code></pre>
+s  &lt;- 0.1</code></pre>
 <p>This specifies the variances for the mixture-of-normals prior on the regression coefficients.</p>
 <pre class="r"><code>s0 &lt;- 10^seq(-4,0,length.out = 12)</code></pre>
 </div>
@@ -577,7 +598,8 @@ library(MASS)
 library(mixsqp)</code></pre>
 <p>This R code provides a very simple implementation of the mr-ash algorithm.</p>
 <pre class="r"><code>source(&quot;../code/misc.R&quot;)
-source(&quot;../code/mr_ash.R&quot;)</code></pre>
+source(&quot;../code/mr_ash.R&quot;)
+source(&quot;../code/mr_ash_with_mixsqp.R&quot;)</code></pre>
 </div>
 <div id="simulate-data" class="section level2">
 <h2>Simulate data</h2>
@@ -600,19 +622,18 @@ b  &lt;- rep(0,p)</code></pre>
 <p>Fit the model by running 200 EM updates for the mixture weights.</p>
 <pre class="r"><code>fit1 &lt;- mr_ash(X,y,se,s0,w0,b,maxiter = 200,verbose = FALSE)</code></pre>
 <p>Fit the model a second time using the mix-SQP updates for the mixture weights.</p>
-<pre class="r"><code>fit2 &lt;- mr_ash_with_mixsqp(X,y,se,s0,w0,b,numiter = 10,maxiter.inner = 50,
-                           tol.inner = 1e-8)
-# iter                elbo max|w0-w0&#39;| niter
-#  100 -8.021690535907e+02 5.01698e-01    50
-#  100 -7.570995347766e+02 3.26960e-01    50
-#  100 -7.548536170925e+02 7.63157e-04    50
-#  100 -7.548532912304e+02 1.45089e-06    36
-#  100 -7.548532912275e+02 1.44478e-09     7
-#  100 -7.548532912275e+02 9.36317e-10     1
-#  100 -7.548532912275e+02 3.76350e-10     1
-#  100 -7.548532912275e+02 7.80299e-11     1
-#  100 -7.548532912275e+02 3.46504e-10     1
-#  100 -7.548532912275e+02 4.31311e-10     1</code></pre>
+<pre class="r"><code>fit2 &lt;- mr_ash_with_mixsqp(X,y,se,s0,w0,b,numiter = 10)
+# iter                elbo max|b-b&#39;| max|w0-w0&#39;|  EM mix   alpha
+#    1 -3.786110149612e+02 5.782e-05 4.59556e-01  40  14 5.0e-01
+#    2 -3.742189639930e+02 4.261e-05 2.12984e-01  13  17 5.0e-01
+#    3 -3.739975329896e+02 7.374e-05 1.77119e-01  12  15 1.0e+00
+#    4 -3.738117653767e+02 3.802e-05 1.15550e-02  14  16 5.0e-01
+#    5 -3.737628735795e+02 9.657e-05 3.12331e-03  10  15 5.0e-01
+#    6 -3.737604578864e+02 8.854e-05 1.31017e-03   8  15 5.0e-01
+#    7 -3.737599689561e+02 3.380e-05 4.95211e-04   8  15 5.0e-01
+#    8 -3.737599026351e+02 8.254e-05 1.92471e-04   6  15 5.0e-01
+#    9 -3.737598918976e+02 5.168e-05 7.11962e-05   5  15 5.0e-01
+#   10 -3.737598904765e+02 6.541e-05 1.65833e-05   3  15 2.5e-01</code></pre>
 </div>
 <div id="review-model-fit" class="section level2">
 <h2>Review model fit</h2>
@@ -623,6 +644,43 @@ b  &lt;- rep(0,p)</code></pre>
   geom_abline(intercept = 0,slope = 1,col = &quot;magenta&quot;,lty = &quot;dotted&quot;) +
   theme_cowplot()</code></pre>
 <p><img src="figure/em_vs_mixsqp.Rmd/plot-coefs-1-1.png" width="288" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-plot-coefs-1-1">
+Past versions of plot-coefs-1-1.png
+</button>
+</p>
+<div id="fig-plot-coefs-1-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/pcarbo/mr-ash/blob/23ad0c275b69250fed672fb7dc1d0a76a7417711/docs/figure/em_vs_mixsqp.Rmd/plot-coefs-1-1.png" target="_blank">23ad0c2</a>
+</td>
+<td>
+Peter Carbonetto
+</td>
+<td>
+2020-02-20
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <p>Compare the posterior mean estimates against the values used to simulate the data.</p>
 <pre class="r"><code>ggplot(data.frame(true = beta,mixsqp = fit2$b),
              aes(x = true,y = mixsqp)) +
@@ -630,13 +688,50 @@ b  &lt;- rep(0,p)</code></pre>
   geom_abline(intercept = 0,slope = 1,col = &quot;magenta&quot;,lty = &quot;dotted&quot;) +
   theme_cowplot()</code></pre>
 <p><img src="figure/em_vs_mixsqp.Rmd/plot-coefs-2-1.png" width="288" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-plot-coefs-2-1">
+Past versions of plot-coefs-2-1.png
+</button>
+</p>
+<div id="fig-plot-coefs-2-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/pcarbo/mr-ash/blob/23ad0c275b69250fed672fb7dc1d0a76a7417711/docs/figure/em_vs_mixsqp.Rmd/plot-coefs-2-1.png" target="_blank">23ad0c2</a>
+</td>
+<td>
+Peter Carbonetto
+</td>
+<td>
+2020-02-20
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <p>Plot the improvement in the solution over time.</p>
 <pre class="r"><code>elbo.best &lt;- max(c(fit1$elbo,fit2$elbo))
 pdat      &lt;- rbind(data.frame(update = &quot;em&quot;,
                               iter   = 1:length(fit1$elbo),
                               elbo   = fit1$elbo),
                    data.frame(update = &quot;mixsqp&quot;,
-                              iter   = cumsum(fit2$niter),
+                              iter   = cumsum(fit2$numem),
                               elbo   = fit2$elbo))
 pdat$elbo &lt;- elbo.best - pdat$elbo + 1e-4
 ggplot(pdat,aes(x = iter,y = elbo,color = update)) +
@@ -647,6 +742,43 @@ ggplot(pdat,aes(x = iter,y = elbo,color = update)) +
   labs(y = &quot;distance to \&quot;best\&quot; elbo&quot;) +
   theme_cowplot()</code></pre>
 <p><img src="figure/em_vs_mixsqp.Rmd/plot-progress-1.png" width="480" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-plot-progress-1">
+Past versions of plot-progress-1.png
+</button>
+</p>
+<div id="fig-plot-progress-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/pcarbo/mr-ash/blob/23ad0c275b69250fed672fb7dc1d0a76a7417711/docs/figure/em_vs_mixsqp.Rmd/plot-progress-1.png" target="_blank">23ad0c2</a>
+</td>
+<td>
+Peter Carbonetto
+</td>
+<td>
+2020-02-20
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <br>
 <p>
 <button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">

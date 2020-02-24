@@ -62,11 +62,12 @@ mr_ash <- function (X, y, se, s0, w0, b, maxiter = 100, tol = 1e-8,
   # Return the updated posterior means of the regression coefficicents
   # ("b"); the prior variances of the mixture components ("s0"); the
   # updated mixture weights ("w0"); the EM update for the mixture
-  # weights ("w0.em"), which will be the same as w0 when update.w0 =
-  # TRUE; residual variance ("se"); the value of the objective after
-  # the (approximate) E-step at each iteration ("elbo"); and the
-  # maximum change in the regression coefficients at each iteration
-  # ("maxd").
+  # weights ("w0.em"); residual variance ("se"); the value of the
+  # objective after the (approximate) E-step at each iteration
+  # ("elbo"); and the maximum change in the regression coefficients at
+  # each iteration ("maxd").
+  #
+  # Note that w0 and w0.em will be the same whenever update.w0 = TRUE.
   return(list(b     = b,
               s0    = s0,
               w0    = w0,
