@@ -27,7 +27,7 @@ mr_ash_with_mixsqp <- function (X, y, se, s0, w0, b, numiter = 10,
 
   # Iterate the mix-SQP updates.
   if (verbose)
-    cat("iter                elbo max|b-b'| max|w0-w0'| niter\n")
+    cat("iter                elbo max|b-b'| max|w0-w0'| E-step M-step\n")
   for (i in 1:numiter) {
 
     # Save the current estimates of the mixture weights.
@@ -35,23 +35,24 @@ mr_ash_with_mixsqp <- function (X, y, se, s0, w0, b, numiter = 10,
 
     # Update the residual variance (se) and the posterior mean estimates
     # of the coefficients (b).
-    out <- mr_ash(X,y,se,s0,w0,b,maxiter.inner,tol.inner,update.se,
+    out1 <- mr_ash(X,y,se,s0,w0,b,maxiter.inner,tol.inner,update.se,
                   update.w0 = FALSE,verbose = FALSE)
-    se  <- out$se
-    b   <- out$b
+    se   <- out1$se
+    b    <- out1$b
 
     # Update the mixture weights.
-    w0 <- update_mixture_weights_with_mixsqp(X,y,b,se,s0)
+    out2 <- update_mixture_weights_with_mixsqp(X,y,b,se,s0)
+    w0   <- out2$w0
     
     # Record the algorithm's progress.
-    elbo[i]  <- max(out$elbo)
+    elbo[i]  <- max(out1$elbo)
     maxd[i]  <- max(abs(w0 - w00))
-    niter[i] <- length(out$elbo)
+    niter[i] <- length(out1$elbo)
 
     # Report progress, if requested.
     if (verbose)
-      cat(sprintf("%4d %0.12e %0.3e %0.5e %5d\n",i,elbo[i],
-                  tail(out$maxd,n = 1),maxd[i],niter[i]))
+      cat(sprintf("%4d %0.12e %0.3e %0.5e %6d %6d\n",i,elbo[i],
+                  tail(out1$maxd,n = 1),maxd[i],niter[i],out2$numiter))
   }
 
   # Return the updated posterior means of the regression coefficicents
@@ -71,7 +72,7 @@ mr_ash_with_mixsqp <- function (X, y, se, s0, w0, b, numiter = 10,
 }
 
 # TO DO: Explain here what this function does, and how to use it.
-update_mixture_weights_with_mixsqp <- function (X, y, b, se, s0) {
+update_mixture_weights_with_mixsqp <- function (X, y, b, se, s0, w0.em) {
 
   # Get the number of predictors (p) and the number of mixture
   # components in the prior (k).
@@ -85,7 +86,12 @@ update_mixture_weights_with_mixsqp <- function (X, y, b, se, s0) {
   for (i in 1:p)
     for (j in 1:k)
       L[i,j] <- bayes_lr_ridge(X[,i],r + X[,i]*b[i],se,s0[j])$logbf
-    w0 <- mixsqp(L,log = TRUE,control = list(verbose = FALSE))$x
+  out <- mixsqp(L,log = TRUE,control = list(verbose = FALSE))
+  w0  <- out$x
+  if (out$status != "converged to optimal solution")
+    warning("mixsqp did not converge to optimal solution")
 
-  return(w0)
+  # Return the updated mixture weights (w0) and the number of mix-SQP
+  # iterations performed (numiter).
+  return(list(w0 = w0,numiter = nrow(out$progress)))
 }
