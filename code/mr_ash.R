@@ -31,8 +31,9 @@ mr_ash <- function (X, y, se, s0, w0, b, maxiter = 100, tol = 1e-8,
     # ------
     # Update the posterior means of the regression coefficients via
     # co-ordinate ascent.
-    out <- mr_ash_update(X,y,b,se,s0,w0)
-    b   <- out$b
+    out   <- mr_ash_update(X,y,b,se,s0,w0)
+    b     <- out$b
+    w0.em <- out$w0.em
     
     # Record the algorithm's progress.
     elbo[i] <- out$elbo
@@ -46,7 +47,7 @@ mr_ash <- function (X, y, se, s0, w0, b, maxiter = 100, tol = 1e-8,
     
     # Update the mixture weights, if requested.
     if (update.w0)
-      w0 <- out$w0.em
+      w0 <- w0.em
 
     # Report progress, if requested.
     if (verbose)
@@ -59,17 +60,20 @@ mr_ash <- function (X, y, se, s0, w0, b, maxiter = 100, tol = 1e-8,
   } 
 
   # Return the updated posterior means of the regression coefficicents
-  # ("b"), the prior variances of the mixture components ("s0"), the
-  # updated mixture weights ("w0"), the updated residual variance
-  # ("se"), the value of the objective after the (approximate) E-step
-  # at each iteration ("elbo"), and the maximum change in the
-  # regression coefficients at each iteration ("maxd").
-  return(list(b    = b,
-              s0   = s0,
-              w0   = w0,
-              se   = se,
-              elbo = elbo[1:i],
-              maxd = maxd[1:i]))
+  # ("b"); the prior variances of the mixture components ("s0"); the
+  # updated mixture weights ("w0"); the EM update for the mixture
+  # weights ("w0.em"), which will be the same as w0 when update.w0 =
+  # TRUE; residual variance ("se"); the value of the objective after
+  # the (approximate) E-step at each iteration ("elbo"); and the
+  # maximum change in the regression coefficients at each iteration
+  # ("maxd").
+  return(list(b     = b,
+              s0    = s0,
+              w0    = w0,
+              w0.em = w0.em,
+              se    = se,
+              elbo  = elbo[1:i],
+              maxd  = maxd[1:i]))
 }
 
 # Perform a single pass of the co-ordinate ascent updates for the
