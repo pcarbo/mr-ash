@@ -27,3 +27,20 @@ b  <- rep(0,p)
 # Fit model.
 fit1 <- mr_ash(X,y,se,s0,w0,b,maxiter = 200,verbose = TRUE)
 fit2 <- mr_ash_with_mixsqp(X,y,se = fit1$se,s0,w0,b,numiter = 10)
+
+# Plot improvement in solution over time.
+elbo.best <- max(c(fit1$elbo,fit2$elbo))
+pdat      <- rbind(data.frame(update = "em",
+                              iter   = 1:length(fit1$elbo),
+                              elbo   = fit1$elbo),
+                   data.frame(update = "mixsqp",
+                              iter   = cumsum(fit2$niter),
+                              elbo   = fit2$elbo))
+pdat$elbo <- elbo.best - pdat$elbo + 1e-4
+ggplot(pdat,aes(x = iter,y = elbo,color = update)) +
+  geom_line() +
+  geom_point() +
+  scale_y_log10() +
+  scale_color_manual(values = c("royalblue","darkorange")) +
+  labs(y = "distance to \"best\" elbo") +
+  theme_cowplot()
