@@ -151,7 +151,7 @@ provided by the two algorithms:
 
 ```{r plot-coefs-2, fig.height=3, fig.width=3}
 ggplot(data.frame(em = fit1$b,mixsqp = fit2$b),
-             aes(x = em,y = mixsqp)) +
+       aes(x = em,y = mixsqp)) +
   geom_point(color = "darkblue") +
   geom_abline(intercept = 0,slope = 1,col = "magenta",lty = "dotted") +
   xlim(-2.25,1) +
@@ -164,9 +164,9 @@ The EM estimates of the mixture weights cause the coefficients to be
 Additionally, the mix-SQP estimates of the mixture weights are much
 more sparse:
 
-```{r plot-mix-weights, fig.height=3, fig.width=3}
+```{r plot-mix-weights, fig.height=3, fig.width=3.25}
 ggplot(data.frame(em = fit1$w0,mixsqp = fit2$w0),
-             aes(x = em,y = mixsqp)) +
+       aes(x = em,y = mixsqp)) +
   geom_point(color = "darkblue") +
   geom_abline(intercept = 0,slope = 1,col = "magenta",lty = "dotted") +
   xlim(0,1) +
