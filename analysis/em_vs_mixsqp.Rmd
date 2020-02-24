@@ -164,7 +164,7 @@ The EM estimates of the mixture weights cause the coefficients to be
 Additionally, the mix-SQP estimates of the mixture weights are much
 more sparse:
 
-```{r plot-mix-weights}
+```{r plot-mix-weights, fig.height=3, fig.width=3}
 ggplot(data.frame(em = fit1$w0,mixsqp = fit2$w0),
              aes(x = em,y = mixsqp)) +
   geom_point(color = "darkblue") +
