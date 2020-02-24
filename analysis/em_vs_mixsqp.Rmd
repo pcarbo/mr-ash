@@ -6,8 +6,9 @@ site: workflowr::wflow_site
 output: workflowr::wflow_html
 ---
 
-Here we compare two different ways of implementing the mixture weight updates
-in mr-ash: EM and mix-SQP.
+Here we compare two different ways of implementing the mixture weight
+updates in mr-ash: EM and mix-SQP. In this example, we will see that
+the mix-SQP updates provide a much better fit to the data.
 
 ```{r knitr, echo=FALSE}
 knitr::opts_chunk$set(comment = "#",results = "hold",collapse = TRUE,
@@ -44,8 +45,7 @@ library(MASS)
 library(mixsqp)
 ```
 
-This R code provides a very simple implementation of the mr-ash
-algorithm.
+This R code provides a simple implementation of the mr-ash algorithm.
 
 ```{r load-functions}
 source("../code/misc.R")
@@ -91,34 +91,16 @@ fit1 <- mr_ash(X,y,se,s0,w0,b,maxiter = 200,verbose = FALSE)
 ```
 
 Fit the model a second time using the mix-SQP updates for the mixture
-weights.
+weights. The "EM", "mix" and "alpha" columns give, for each iteration,
+the number of co-ordinate ascent ("inner loop") updates run, the
+number of mix-SQP iterations performed, and the step size for the
+mix-SQP update (as determined by backtracking line search).
 
 ```{r fit-model-mixsqp}
 fit2 <- mr_ash_with_mixsqp(X,y,se,s0,w0,b,numiter = 10)
 ```
 
 ## Review model fit
-
-Compare the posterior mean estimates from the two fits.
-
-```{r plot-coefs-1, fig.height=3, fig.width=3}
-ggplot(data.frame(em = fit1$b,mixsqp = fit2$b),
-             aes(x = em,y = mixsqp)) +
-  geom_point(color = "darkblue") +
-  geom_abline(intercept = 0,slope = 1,col = "magenta",lty = "dotted") +
-  theme_cowplot()
-```
-
-Compare the posterior mean estimates against the values used to
-simulate the data.
-
-```{r plot-coefs-2, fig.height=3, fig.width=3}
-ggplot(data.frame(true = beta,mixsqp = fit2$b),
-             aes(x = true,y = mixsqp)) +
-  geom_point(color = "darkblue") +
-  geom_abline(intercept = 0,slope = 1,col = "magenta",lty = "dotted") +
-  theme_cowplot()
-```
 
 Plot the improvement in the solution over time.
 
@@ -137,5 +119,39 @@ ggplot(pdat,aes(x = iter,y = elbo,color = update)) +
   scale_y_log10() +
   scale_color_manual(values = c("royalblue","darkorange")) +
   labs(y = "distance to \"best\" elbo") +
+  theme_cowplot()
+```
+
+The algorithm with the mix-SQP updates of the mixture weights provides
+a much better fit to the data.
+
+Compare the posterior mean estimates by the against the values
+used to simulate the data.
+
+```{r plot-coefs-1, fig.height=3, fig.width=6}
+p1 <- ggplot(data.frame(true = beta,em = fit1$b),
+             aes(x = true,y = em)) +
+  geom_point(color = "darkblue") +
+  geom_abline(intercept = 0,slope = 1,col = "magenta",lty = "dotted") +
+  xlim(-4,4) +
+  ylim(-4,4) +
+  theme_cowplot()
+p2 <- ggplot(data.frame(true = beta,mixsqp = fit2$b),
+             aes(x = true,y = mixsqp)) +
+  geom_point(color = "darkblue") +
+  geom_abline(intercept = 0,slope = 1,col = "magenta",lty = "dotted") +
+  xlim(-4,4) +
+  ylim(-4,4) +
+  theme_cowplot()
+plot_grid(p1,p2)
+```
+
+```{r plot-coefs-2, fig.height=3, fig.width=6}
+ggplot(data.frame(em = fit1$b,mixsqp = fit2$b),
+             aes(x = em,y = mixsqp)) +
+  geom_point(color = "darkblue") +
+  geom_abline(intercept = 0,slope = 1,col = "magenta",lty = "dotted") +
+  xlim(-2.25,0.75) +
+  ylim(-2.25,0.75) +
   theme_cowplot()
 ```
