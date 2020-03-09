@@ -1,0 +1,21 @@
+---
+title: Comparing two different ways of estimating the mixture weights in mr-ash
+author: Peter Carbonetto
+date: February 20, 2020
+site: workflowr::wflow_site
+output: workflowr::wflow_html
+---
+
+Generate random numbers.
+
+```{r}
+set.seed(1)
+x <- rnorm(10)
+y <- rnorm(10)
+```
+
+Plot the numbers.
+
+```{r}
+plot(x,y)
+```
