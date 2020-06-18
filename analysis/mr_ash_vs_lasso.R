@@ -71,6 +71,6 @@ ggplot(data.frame(glmnet = rmse1,mr.ash = rmse2),
        aes(x = glmnet,y = mr.ash)) +
   geom_point(size = 2,shape = 21,color = "white",fill = "black") +
   geom_abline(slope = 1,intercept = 0,color = "skyblue",linetype = "dotted") +
-  xlim(range(c(rmse1,rmse2))) +
-  ylim(range(c(rmse1,rmse2))) +
+  xlim(16,22) +
+  ylim(16,22) +
   theme_cowplot()
