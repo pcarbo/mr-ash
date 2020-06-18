@@ -1,0 +1,47 @@
+---
+title: Add title here
+author: Peter Carbonetto
+date: June 18, 2020
+site: workflowr::wflow_site
+output: workflowr::wflow_html
+---
+
+*Add text here giving overview of analysis.*
+
+```{r knitr, echo=FALSE}
+knitr::opts_chunk$set(comment = "#",results = "hold",collapse = TRUE,
+                      fig.align = "center",dpi = 140)
+```
+
+Analysis settings
+-----------------
+
+Analysis settings: number of simulations (ns), number of samples in
+training set (n), number of simulated variables (p), number of
+variables with a nonzero effect on the continuous outcome (p1),
+proportion of variance in the outcome explained by the variables
+(pve).
+
+```{r params}
+ns  <- 10
+n   <- 500
+p   <- 1000
+p1  <- 200
+pve <- 0.95
+```
+
+*Briefly explain here how these packages are being used.*
+
+```{load-pkgs}
+library(glmnet)
+library(mr.ash.alpha)
+library(ggplot2)
+library(cowplot)
+source("../code/functions_for_mr_ash_vs_lasso.R")
+```
+
+*Add text here describing how the simulations are implemented.*
+
+```{r run-sims}
+
+```
