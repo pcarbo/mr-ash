@@ -83,7 +83,7 @@ update_mixture_weights_with_mixsqp <- function (X, y, se, s0, w0, b) {
 
   # Compute the mix-SQP update for the mixture weights. Note that this
   # update is not guaranteed to increase the ELBO.
-  out1 <- compute_mixsqp_update(X,y,se,s0,w0,b)
+  out1 <- compute_mixsqp_update(X,y,se,s0,b)
 
   # Perform backtracking line search to identify a step size that
   # increases the ELBO.
@@ -99,12 +99,12 @@ update_mixture_weights_with_mixsqp <- function (X, y, se, s0, w0, b) {
 
 # Compute the mix-SQP update for the mixture weights. Note that this
 # update is not guaranteed to increase the ELBO.
-compute_mixsqp_update <- function (X, y, se, s0, w0, b) {
+compute_mixsqp_update <- function (X, y, se, s0, b) {
     
   # Get the number of predictors (p) and the number of mixture
   # components in the prior (k).
   p <- length(b)
-  k <- length(w0)
+  k <- length(s0)
 
   # Compute the p x k matrix of log-likelihoods conditional on each
   # prior mixture component.
