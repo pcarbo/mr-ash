@@ -5,8 +5,6 @@ library(ggplot2)
 library(cowplot)
 source("../code/functions_for_mr_ash_vs_lasso.R")
 
-set.seed(1)
-
 # SCRIPT SETTINGS
 # ---------------
 ns  <- 10   # Number of simulations.
