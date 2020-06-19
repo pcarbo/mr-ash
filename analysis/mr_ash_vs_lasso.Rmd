@@ -28,17 +28,12 @@ pve <- 0.95
 
 *Briefly explain here how these packages are being used.*
 
-```{r load-pkgs}
+```{r initial-setup}
 library(glmnet)
 library(mr.ash.alpha)
 library(ggplot2)
 library(cowplot)
 source("../code/functions_for_mr_ash_vs_lasso.R")
-```
-
-Initialize the sequence of pseudorandom numbers.
-
-```{r set-seed}
 set.seed(1)
 ```
 
@@ -88,21 +83,22 @@ against the glmnet estimates.
 ```{r}
 p1 <- ggplot(res,aes(x = rmse.min,y = rmse.1se,fill = p1)) +
   geom_point(size = 2,shape = 21,color = "white") +
-  geom_abline(slope = 1,intercept = 0,color = "skyblue",linetype = "dotted") +
+  geom_abline(slope = 1,intercept = 0,color = "black",linetype = "dotted") +
   scale_fill_gradient2(low = "lightskyblue",mid = "gold",high = "orangered",
                        midpoint = 250) +
-  labs(x = "glmnet (\u03bb = min)",
-       y = "glmnet (\u03bb = 1se)") +
+  labs(x = "glmnet (\u03bb = \"min\")",
+       y = "glmnet (\u03bb = \"1se\")") +
   theme_cowplot(12)
 ```
 
 ```{r}
-p2 <- ggplot(res,aes(x = rmse.min,y = rmse.mrash1,fill = p1)) +
+p2 <- ggplot(res,aes(x = rmse.min,y = rmse.mrash2,fill = p1)) +
   geom_point(size = 2,shape = 21,color = "white") +
   geom_abline(slope = 1,intercept = 0,color = "black",linetype = "dotted") +
   scale_fill_gradient2(low = "lightskyblue",mid = "gold",high = "orangered",
                        midpoint = 250) +
-  labs(x = "glmnet (\u03bb = min)",y = "mr.ash") +
+  labs(x = "glmnet (\u03bb = min)",
+       y = "mr.ash (lasso init)") +
   theme_cowplot(12)
 ```
 
@@ -112,6 +108,6 @@ p3 <- ggplot(res,aes(x = rmse.mrash1,y = rmse.mrash2,fill = p1)) +
   geom_abline(slope = 1,intercept = 0,color = "black",linetype = "dotted") +
   scale_fill_gradient2(low = "lightskyblue",mid = "gold",high = "orangered",
                        midpoint = 250) +
-  labs(x = "mr.ash",y = "mr.ash (lasso init.)") +
+  labs(x = "mr.ash",y = "mr.ash (lasso init)") +
   theme_cowplot(12)
 ```
