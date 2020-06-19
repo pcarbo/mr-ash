@@ -81,7 +81,7 @@ Create a scatterplot comparing the accuracy of the mr.ash estimates
 against the glmnet estimates.
 
 ```{r}
-p1 <- ggplot(res,aes(x = rmse.min,y = rmse.1se,fill = p1)) +
+plot1 <- ggplot(res,aes(x = rmse.min,y = rmse.1se,fill = p1)) +
   geom_point(size = 2,shape = 21,color = "white") +
   geom_abline(slope = 1,intercept = 0,color = "black",linetype = "dotted") +
   scale_fill_gradient2(low = "lightskyblue",mid = "gold",high = "orangered",
@@ -92,7 +92,7 @@ p1 <- ggplot(res,aes(x = rmse.min,y = rmse.1se,fill = p1)) +
 ```
 
 ```{r}
-p2 <- ggplot(res,aes(x = rmse.min,y = rmse.mrash2,fill = p1)) +
+plot2 <- ggplot(res,aes(x = rmse.min,y = rmse.mrash2,fill = p1)) +
   geom_point(size = 2,shape = 21,color = "white") +
   geom_abline(slope = 1,intercept = 0,color = "black",linetype = "dotted") +
   scale_fill_gradient2(low = "lightskyblue",mid = "gold",high = "orangered",
@@ -103,7 +103,7 @@ p2 <- ggplot(res,aes(x = rmse.min,y = rmse.mrash2,fill = p1)) +
 ```
 
 ```{r}
-p3 <- ggplot(res,aes(x = rmse.mrash1,y = rmse.mrash2,fill = p1)) +
+plot3 <- ggplot(res,aes(x = rmse.mrash1,y = rmse.mrash2,fill = p1)) +
   geom_point(size = 2,shape = 21,color = "white") +
   geom_abline(slope = 1,intercept = 0,color = "black",linetype = "dotted") +
   scale_fill_gradient2(low = "lightskyblue",mid = "gold",high = "orangered",
@@ -124,19 +124,22 @@ Xtest <- dat$Xtest
 ytest <- dat$ytest
 fit.glmnet <- cv.glmnet(X,y,alpha = 0.95,standardize = FALSE)
 fit.mrash1 <- mr.ash(X,y,standardize = FALSE)
-w <- rep(0,20)
-w[1] <- 0.4
-w[6] <- 0.6
-w <- w + 0.001
-w <- w/sum(w)
-fit.mrash2 <- mr.ash(X,y,pi = w,update.pi = FALSE,
-                     standardize = FALSE)
+fit.mrash2 <- mr.ash(X,y,update.pi = FALSE,standardize = FALSE,
+                     sa2 = c(0,1/80),pi = c(0.5,0.5))
+fit.mrash2 <- varbvsmix(X,NULL,y,update.w = FALSE,
+                        sa = c(0,1/80),w = c(0.5,0.5))
+fit.mrash3 <- varbvsmix(X,NULL,y,update.w = TRUE,
+                        sa = c(0,1/200),w = c(0.5,0.5),
+						alpha = fit.mrash2$alpha,mu = fit.mrash2$mu,
+						drop.threshold = 0)
 y.min      <- drop(predict(fit.glmnet,Xtest,s = "lambda.min"))
 y.mrash1   <- predict(fit.mrash1,Xtest)
 y.mrash2   <- predict(fit.mrash2,Xtest)
+y.mrash3   <- predict(fit.mrash3,Xtest)
 print(sqrt(mean((ytest - y.min)^2)))
 print(sqrt(mean((ytest - y.mrash1)^2)))
 print(sqrt(mean((ytest - y.mrash2)^2)))
+print(sqrt(mean((ytest - y.mrash3)^2)))
 qplot(coef(fit.glmnet,s = "lambda.min")[-1],fit.mrash1$beta) +
   theme_cowplot(12)
 qplot(coef(fit.glmnet,s = "lambda.min")[-1],fit.mrash2$beta) +
