@@ -19,7 +19,7 @@ variables with an effect on the continuous outcome (p1), proportion of
 variance in the outcome explained by the variables (pve).
 
 ```{r params}
-ns  <- 100
+ns  <- 16
 n   <- 500
 p   <- 1000
 p1  <- 500
@@ -34,13 +34,12 @@ library(mr.ash.alpha)
 library(ggplot2)
 library(cowplot)
 source("../code/functions_for_mr_ash_vs_lasso.R")
-set.seed(1)
 ```
 
 *Add text here.*
 
 ```{r init-rsme}
-res <- data.frame(p1          = rep(0,ns),
+res <- data.frame(p1          = round(seq(1,p1,length.out = ns)),
                   rmse.min    = rep(0,ns),
                   rmse.1se    = rep(0,ns),
  				  rmse.mrash1 = rep(0,ns),
@@ -53,12 +52,14 @@ res <- data.frame(p1          = rep(0,ns),
 ```{r run-sims, warning=FALSE}
 for (i in 1:ns) {
   cat(i,"")
-  dat   <- simulate_data(n,p,sample(p1,1),pve)
+  set.seed(i)
+  p1    <- res[i,"p1"]
+  dat   <- simulate_data(n,p,p1,pve)
   X     <- dat$X
   y     <- dat$y
   Xtest <- dat$Xtest
   ytest <- dat$ytest
-  fit.glmnet <- cv.glmnet(X,y,standardize = FALSE)
+  fit.glmnet <- cv.glmnet(X,y,alpha = 0.95,standardize = FALSE)
   b.glmnet   <- coef(fit.glmnet,s = "lambda.min")[-1]
   y1         <- drop(predict(fit.glmnet,dat$X,s = "lambda.min"))
   s          <- var(y - y1)
@@ -68,7 +69,6 @@ for (i in 1:ns) {
   y.1se      <- drop(predict(fit.glmnet,Xtest,s = "lambda.1se"))
   y.mrash1   <- predict(fit.mrash1,Xtest)
   y.mrash2   <- predict(fit.mrash2,Xtest)
-  res[i,"p1"] <- sum(dat$b != 0)
   res[i,"rmse.min"]    <- sqrt(mean((ytest - y.min)^2))
   res[i,"rmse.1se"]    <- sqrt(mean((ytest - y.1se)^2))
   res[i,"rmse.mrash1"] <- sqrt(mean((ytest - y.mrash1)^2))
@@ -109,5 +109,36 @@ p3 <- ggplot(res,aes(x = rmse.mrash1,y = rmse.mrash2,fill = p1)) +
   scale_fill_gradient2(low = "lightskyblue",mid = "gold",high = "orangered",
                        midpoint = 250) +
   labs(x = "mr.ash",y = "mr.ash (lasso init)") +
+  theme_cowplot(12)
+```
+
+Look at one example in greater detail.
+
+```{r}
+set.seed(15)
+p1    <- 467
+dat   <- simulate_data(n,p,p1,pve)
+X     <- dat$X
+y     <- dat$y
+Xtest <- dat$Xtest
+ytest <- dat$ytest
+fit.glmnet <- cv.glmnet(X,y,alpha = 0.95,standardize = FALSE)
+fit.mrash1 <- mr.ash(X,y,standardize = FALSE)
+w <- rep(0,20)
+w[1] <- 0.4
+w[6] <- 0.6
+w <- w + 0.001
+w <- w/sum(w)
+fit.mrash2 <- mr.ash(X,y,pi = w,update.pi = FALSE,
+                     standardize = FALSE)
+y.min      <- drop(predict(fit.glmnet,Xtest,s = "lambda.min"))
+y.mrash1   <- predict(fit.mrash1,Xtest)
+y.mrash2   <- predict(fit.mrash2,Xtest)
+print(sqrt(mean((ytest - y.min)^2)))
+print(sqrt(mean((ytest - y.mrash1)^2)))
+print(sqrt(mean((ytest - y.mrash2)^2)))
+qplot(coef(fit.glmnet,s = "lambda.min")[-1],fit.mrash1$beta) +
+  theme_cowplot(12)
+qplot(coef(fit.glmnet,s = "lambda.min")[-1],fit.mrash2$beta) +
   theme_cowplot(12)
 ```
