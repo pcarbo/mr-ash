@@ -1,32 +1,28 @@
 ---
-title: Add title here
+title: mr.ash vs. lasso
 author: Peter Carbonetto
 date: June 18, 2020
 site: workflowr::wflow_site
 output: workflowr::wflow_html
 ---
 
-*Add text here giving overview of analysis.*
+*Add text here giving overview of analysis, and results.*
 
 ```{r knitr, echo=FALSE}
 knitr::opts_chunk$set(comment = "#",results = "hold",collapse = TRUE,
                       fig.align = "center",dpi = 140)
 ```
 
-Analysis setup
---------------
-
 Analysis settings: number of simulations (ns), number of samples in
-training set (n), number of simulated variables (p), number of
-variables with a nonzero effect on the continuous outcome (p1),
-proportion of variance in the outcome explained by the variables
-(pve).
+training set (n), number of simulated variables (p), maximum number of
+variables with an effect on the continuous outcome (p1), proportion of
+variance in the outcome explained by the variables (pve).
 
 ```{r params}
-ns  <- 10
+ns  <- 100
 n   <- 500
 p   <- 1000
-p1  <- 200
+p1  <- 500
 pve <- 0.95
 ```
 
@@ -44,25 +40,78 @@ Initialize the sequence of pseudorandom numbers.
 
 ```{r set-seed}
 set.seed(1)
-
-Run simulations
----------------
+```
 
 *Add text here.*
 
 ```{r init-rsme}
-rsme <- data.frame(lasso.min     = rep(0,ns),
-                   lasso.1se     = rep(0,ns),
-				   mr.ash        = rep(0,ns),
-				   mr.ash.better = rep(0,ns))
+res <- data.frame(p1          = rep(0,ns),
+                  rmse.min    = rep(0,ns),
+                  rmse.1se    = rep(0,ns),
+ 				  rmse.mrash1 = rep(0,ns),
+				  rmse.mrash2 = rep(0,ns))
 ```
 
 *Add text here describing how the simulations are implemented, and
  what is done in each iteration.*
 
-```{r run-sims}
+```{r run-sims, warning=FALSE}
 for (i in 1:ns) {
   cat(i,"")
-  dat <- simulate_data(n,p,p1,pve)
+  dat   <- simulate_data(n,p,sample(p1,1),pve)
+  X     <- dat$X
+  y     <- dat$y
+  Xtest <- dat$Xtest
+  ytest <- dat$ytest
+  fit.glmnet <- cv.glmnet(X,y,standardize = FALSE)
+  b.glmnet   <- coef(fit.glmnet,s = "lambda.min")[-1]
+  y1         <- drop(predict(fit.glmnet,dat$X,s = "lambda.min"))
+  s          <- var(y - y1)
+  fit.mrash1 <- mr.ash(X,y,standardize = FALSE)
+  fit.mrash2 <- mr.ash(X,y,beta.init = b.glmnet,sigma2 = s)
+  y.min      <- drop(predict(fit.glmnet,Xtest,s = "lambda.min"))
+  y.1se      <- drop(predict(fit.glmnet,Xtest,s = "lambda.1se"))
+  y.mrash1   <- predict(fit.mrash1,Xtest)
+  y.mrash2   <- predict(fit.mrash2,Xtest)
+  res[i,"p1"] <- sum(dat$b != 0)
+  res[i,"rmse.min"]    <- sqrt(mean((ytest - y.min)^2))
+  res[i,"rmse.1se"]    <- sqrt(mean((ytest - y.1se)^2))
+  res[i,"rmse.mrash1"] <- sqrt(mean((ytest - y.mrash1)^2))
+  res[i,"rmse.mrash2"] <- sqrt(mean((ytest - y.mrash2)^2))
 }
+cat("\n")
+```
+
+Create a scatterplot comparing the accuracy of the mr.ash estimates
+against the glmnet estimates.
+
+```{r}
+p1 <- ggplot(res,aes(x = rmse.min,y = rmse.1se,fill = p1)) +
+  geom_point(size = 2,shape = 21,color = "white") +
+  geom_abline(slope = 1,intercept = 0,color = "skyblue",linetype = "dotted") +
+  scale_fill_gradient2(low = "lightskyblue",mid = "gold",high = "orangered",
+                       midpoint = 250) +
+  labs(x = "glmnet (\u03bb = min)",
+       y = "glmnet (\u03bb = 1se)") +
+  theme_cowplot(12)
+```
+
+```{r}
+p2 <- ggplot(res,aes(x = rmse.min,y = rmse.mrash1,fill = p1)) +
+  geom_point(size = 2,shape = 21,color = "white") +
+  geom_abline(slope = 1,intercept = 0,color = "black",linetype = "dotted") +
+  scale_fill_gradient2(low = "lightskyblue",mid = "gold",high = "orangered",
+                       midpoint = 250) +
+  labs(x = "glmnet (\u03bb = min)",y = "mr.ash") +
+  theme_cowplot(12)
+```
+
+```{r}
+p3 <- ggplot(res,aes(x = rmse.mrash1,y = rmse.mrash2,fill = p1)) +
+  geom_point(size = 2,shape = 21,color = "white") +
+  geom_abline(slope = 1,intercept = 0,color = "black",linetype = "dotted") +
+  scale_fill_gradient2(low = "lightskyblue",mid = "gold",high = "orangered",
+                       midpoint = 250) +
+  labs(x = "mr.ash",y = "mr.ash (lasso init.)") +
+  theme_cowplot(12)
 ```

@@ -26,6 +26,11 @@ simulate_data <- function (n, p, p1, pve) {
   y     <- y[-test]
 
   # Output ...
-  return(X = X,y = y,Xtest = Xtest,ytest = ytest)
+  return(list(X     = X,
+              y     = y,
+              Xtest = Xtest,
+              ytest = ytest,
+              b     = b,
+              se    = se))
 }
 
