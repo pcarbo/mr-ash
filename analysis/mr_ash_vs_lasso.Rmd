@@ -19,7 +19,7 @@ variables with an effect on the continuous outcome (p1), proportion of
 variance in the outcome explained by the variables (pve).
 
 ```{r params}
-ns  <- 16
+ns  <- 20
 n   <- 500
 p   <- 1000
 p1  <- 500
@@ -40,6 +40,7 @@ source("../code/functions_for_mr_ash_vs_lasso.R")
 
 ```{r init-rsme}
 res <- data.frame(p1          = round(seq(1,p1,length.out = ns)),
+                  rmse.true   = rep(0,ns),
                   rmse.min    = rep(0,ns),
                   rmse.1se    = rep(0,ns),
  				  rmse.mrash1 = rep(0,ns),
@@ -59,16 +60,19 @@ for (i in 1:ns) {
   y     <- dat$y
   Xtest <- dat$Xtest
   ytest <- dat$ytest
+  b     <- dat$b
   fit.glmnet <- cv.glmnet(X,y,alpha = 0.95,standardize = FALSE)
   b.glmnet   <- coef(fit.glmnet,s = "lambda.min")[-1]
   y1         <- drop(predict(fit.glmnet,dat$X,s = "lambda.min"))
   s          <- var(y - y1)
   fit.mrash1 <- mr.ash(X,y,standardize = FALSE)
   fit.mrash2 <- mr.ash(X,y,beta.init = b.glmnet,sigma2 = s)
+  y.true     <- drop(Xtest %*% b)
   y.min      <- drop(predict(fit.glmnet,Xtest,s = "lambda.min"))
   y.1se      <- drop(predict(fit.glmnet,Xtest,s = "lambda.1se"))
   y.mrash1   <- predict(fit.mrash1,Xtest)
   y.mrash2   <- predict(fit.mrash2,Xtest)
+  res[i,"rmse.true"]   <- sqrt(mean((ytest - y.true)^2))
   res[i,"rmse.min"]    <- sqrt(mean((ytest - y.min)^2))
   res[i,"rmse.1se"]    <- sqrt(mean((ytest - y.1se)^2))
   res[i,"rmse.mrash1"] <- sqrt(mean((ytest - y.mrash1)^2))
@@ -81,7 +85,8 @@ Create a scatterplot comparing the accuracy of the mr.ash estimates
 against the glmnet estimates.
 
 ```{r}
-plot1 <- ggplot(res,aes(x = rmse.min,y = rmse.1se,fill = p1)) +
+plot1 <- ggplot(res,aes(x = rmse.min/rmse.true,y = rmse.1se/rmse.true,
+                        fill = p1)) +
   geom_point(size = 2,shape = 21,color = "white") +
   geom_abline(slope = 1,intercept = 0,color = "black",linetype = "dotted") +
   scale_fill_gradient2(low = "lightskyblue",mid = "gold",high = "orangered",
@@ -92,7 +97,8 @@ plot1 <- ggplot(res,aes(x = rmse.min,y = rmse.1se,fill = p1)) +
 ```
 
 ```{r}
-plot2 <- ggplot(res,aes(x = rmse.min,y = rmse.mrash2,fill = p1)) +
+plot2 <- ggplot(res,aes(x = rmse.min/rmse.true,y = rmse.mrash2/rmse.true,
+                        fill = p1)) +
   geom_point(size = 2,shape = 21,color = "white") +
   geom_abline(slope = 1,intercept = 0,color = "black",linetype = "dotted") +
   scale_fill_gradient2(low = "lightskyblue",mid = "gold",high = "orangered",
@@ -103,7 +109,8 @@ plot2 <- ggplot(res,aes(x = rmse.min,y = rmse.mrash2,fill = p1)) +
 ```
 
 ```{r}
-plot3 <- ggplot(res,aes(x = rmse.mrash1,y = rmse.mrash2,fill = p1)) +
+plot3 <- ggplot(res,aes(x = rmse.mrash1/rmse.true,y = rmse.mrash2/rmse.true,
+                        fill = p1)) +
   geom_point(size = 2,shape = 21,color = "white") +
   geom_abline(slope = 1,intercept = 0,color = "black",linetype = "dotted") +
   scale_fill_gradient2(low = "lightskyblue",mid = "gold",high = "orangered",
@@ -114,7 +121,7 @@ plot3 <- ggplot(res,aes(x = rmse.mrash1,y = rmse.mrash2,fill = p1)) +
 
 Look at one example in greater detail.
 
-```{r}
+```{r, eval=FALSE}
 set.seed(15)
 p1    <- 467
 dat   <- simulate_data(n,p,p1,pve)

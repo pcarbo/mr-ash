@@ -16,7 +16,6 @@ simulate_data <- function (n, p, p1, pve) {
   y  <- drop(X %*% b)
   se <- sqrt((1 - pve)/pve) * sd(y)
   y  <- y + rnorm(n,sd = se)
-  y  <- y - mean(y)
 
   # Split the data 50-50 into a training set and a test set.
   test  <- 1:n
