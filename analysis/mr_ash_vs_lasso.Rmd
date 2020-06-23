@@ -19,7 +19,7 @@ variables with an effect on the continuous outcome (p1), proportion of
 variance in the outcome explained by the variables (pve).
 
 ```{r params}
-ns  <- 20
+ns  <- 100
 n   <- 500
 p   <- 1000
 p1  <- 500
@@ -131,8 +131,6 @@ Xtest <- dat$Xtest
 ytest <- dat$ytest
 fit.glmnet <- cv.glmnet(X,y,alpha = 0.95,standardize = FALSE)
 fit.mrash1 <- mr.ash(X,y,standardize = FALSE)
-fit.mrash2 <- mr.ash(X,y,update.pi = FALSE,standardize = FALSE,
-                     sa2 = c(0,1/80),pi = c(0.5,0.5))
 fit.mrash2 <- varbvsmix(X,NULL,y,update.w = FALSE,
                         sa = c(0,1/80),w = c(0.5,0.5))
 fit.mrash3 <- varbvsmix(X,NULL,y,update.w = TRUE,
