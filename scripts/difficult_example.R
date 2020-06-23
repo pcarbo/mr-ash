@@ -43,10 +43,41 @@ y     <- y[-test]
 # ("lambda") is chosen via 10-fold cross-validation.
 fit.glmnet <- cv.glmnet(X,y,alpha = 0.95,standardize = FALSE)
 
+# Fit the mr.ash model. 
+fit.mrash <- mr.ash(X,y,standardize = FALSE)
+
+# Fit the mr.ash model a second time, but provide an (unfair)
+# advantage to mr.ash by providing it with the prior used to simulate the
+# data.
+w1 <- p1/p
+s  <- var(predict(fit.glmnet,X) - y)
+fit.optg <- mr.ash(X,y,update.pi = FALSE,update.sigma2 = FALSE,
+                   sigma2 = s,sa2 = c(0,1/s),pi = c(1 - w1,w1))
+
+# Now we provide mr.ash with a slightly weaker (unfair) advantage,
+# where we initialize it to the prior used to simulate the data, but
+# allow it to fit the prior.
+fit.initoptg <- mr.ash(X,y,update.pi = TRUE,update.sigma2 = TRUE,
+                       sigma2 = s,sa2 = c(0,1/s),pi = c(1 - w1,w1))
+
+fit.varbvs <- varbvs(X,NULL,y,update.sigma = TRUE,sa = 1/s,
+                     logodds = seq(-3,0,length.out = 20),
+                     verbose = FALSE)
+
 # Predict the test set outcomes using the fitted models.
-y.glmnet <- drop(predict(fit.glmnet,Xtest,s = "lambda.min"))
+y.glmnet   <- drop(predict(fit.glmnet,Xtest,s = "lambda.min"))
+y.mrash    <- predict(fit.mrash,Xtest)
+y.optg     <- predict(fit.optg,Xtest)
+y.initoptg <- predict(fit.initoptg,Xtest)
+y.varbvs   <- predict(fit.varbvs,Xtest)
 
 # Assess accuracy of the test predictions by compute the root-mean
 # squared error (RMSE).
 print(sqrt(mean((ytest - y.glmnet)^2)),digits = 3)
+print(sqrt(mean((ytest - y.mrash)^2)),digits = 3)
+print(sqrt(mean((ytest - y.optg)^2)),digits = 3)
+print(sqrt(mean((ytest - y.initoptg)^2)),digits = 3)
+print(sqrt(mean((ytest - y.varbvs)^2)),digits = 3)
 
+sigmoid10 <- function (x)  1/(1 + 10^(-x))
+with(fit.varbvs,plot(sigmoid10(logodds),logw,type="l",lwd = 2,log = "x"))
