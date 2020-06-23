@@ -10,22 +10,77 @@ To our surprise, we discovered that the Lasso (or Elastic Net)
 sometimes provides more considerably more accurate predictions than
 mr.ash in settings where many predictors have a small effect on the
 outcome. Here I expand on an example from
-[Matthew's brief investigation][mr-ash-vs-lasso] to better understand
-the (mis) behaviour of mr.ash.
+[Matthew's brief investigation of this phenomenon][mr-ash-vs-lasso] to
+better understand the (mis) behaviour of mr.ash.
 
 ```{r knitr, echo=FALSE}
 knitr::opts_chunk$set(comment = "#",results = "hold",collapse = TRUE,
                       fig.align = "center",dpi = 140)
 ```
 
-These are the packages we will use in the example.
+Load packages
+-------------
 
-```{r load-pkgs}
+These are the packages used in the analysis.
+
+```{r load-pkgs, message=FALSE, warning=FALSE}
 library(glmnet)
 library(varbvs)
 library(mr.ash.alpha)
 library(ggplot2)
 library(cowplot)
+```
+
+Simulate data
+-------------
+
+I simulate the data just as Matthew did, except that I split the data
+into a training and a test set.
+
+These are the data simulation settings: the number of samples in
+training set, "n"; number of simulated variables, "p"; the number
+of variables affecting the outcome ("p1"); and the proportion of variance in the outcome explained by the variables ("pve").
+
+```{r data-sim-params}
+n   <- 500
+p   <- 1000
+p1  <- 467
+pve <- 0.95
+```
+
+Simulate a $2n x p$ design matrix; the first $n$ rows is the training set
+data, and the remaining $n$ rows are the test data.
+
+```{r sim-x}
+X <- matrix(rnorm(2*n*p),2*n,p)
+X <- scale(X,center = TRUE,scale = TRUE)
+```
+
+Simulate the $p$ regression coefficients; only $p_1 < p$ of the
+coefficients are nonzero.
+
+```{r sim-coef}
+b    <- rep(0,p)
+j    <- sample(p,p1)
+b[j] <- rnorm(p1)
+```
+
+Simulate the responses so that the target PVE is met.
+
+```{r sim-y}
+y  <- drop(X %*% b)
+se <- sqrt((1 - pve)/pve) * sd(y)
+y  <- y + rnorm(n,sd = se)
+```
+
+Split the data 50-50 into a training set and a test set.
+
+```{r split-data}
+test  <- 1:n
+Xtest <- X[test,]
+ytest <- y[test]
+X     <- X[-test,]
+y     <- y[-test]
 ```
 
 [mr-ash-vs-lasso]: https://stephens999.github.io/misc/mr_ash_vs_lasso.html
