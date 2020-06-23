@@ -414,16 +414,16 @@ This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcompcarbomrashtreea17034e67dfa7727e6bb06ac81226ce8ccbf7c90targetblanka17034ea"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/pcarbo/mr-ash/tree/a17034e67dfa7727e6bb06ac81226ce8ccbf7c90" target="_blank">a17034e</a> </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcompcarbomrashtree60e964af8f6b91814457ccf01c70228b4600ba7btargetblank60e964aa"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/pcarbo/mr-ash/tree/60e964af8f6b91814457ccf01c70228b4600ba7b" target="_blank">60e964a</a> </a>
 </p>
 </div>
-<div id="strongRepositoryversionstrongahrefhttpsgithubcompcarbomrashtreea17034e67dfa7727e6bb06ac81226ce8ccbf7c90targetblanka17034ea" class="panel-collapse collapse">
+<div id="strongRepositoryversionstrongahrefhttpsgithubcompcarbomrashtree60e964af8f6b91814457ccf01c70228b4600ba7btargetblank60e964aa" class="panel-collapse collapse">
 <div class="panel-body">
 <p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility.
 </p>
 <p>
-The results in this page were generated with repository version <a href="https://github.com/pcarbo/mr-ash/tree/a17034e67dfa7727e6bb06ac81226ce8ccbf7c90" target="_blank">a17034e</a>. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
+The results in this page were generated with repository version <a href="https://github.com/pcarbo/mr-ash/tree/60e964af8f6b91814457ccf01c70228b4600ba7b" target="_blank">60e964a</a>. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
 </p>
 <p>
 Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
@@ -431,6 +431,7 @@ Note that you need to be careful to ensure that all relevant files for the analy
 <pre><code>
 Unstaged changes:
     Modified:   analysis/index.Rmd
+    Modified:   scripts/difficult_example.R
 
 </code></pre>
 <p>
@@ -474,6 +475,40 @@ Message
 Rmd
 </td>
 <td>
+<a href="https://github.com/pcarbo/mr-ash/blob/60e964af8f6b91814457ccf01c70228b4600ba7b/analysis/difficult_example.Rmd" target="_blank">60e964a</a>
+</td>
+<td>
+Peter Carbonetto
+</td>
+<td>
+2020-06-23
+</td>
+<td>
+wflow_publish(“difficult_example.Rmd”)
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/pcarbo/mr-ash/7c393a24e8fd8c32f182e4433f9a27984e215dba/docs/difficult_example.html" target="_blank">7c393a2</a>
+</td>
+<td>
+Peter Carbonetto
+</td>
+<td>
+2020-06-23
+</td>
+<td>
+Built difficult_example for first time.
+</td>
+</tr>
+<tr>
+<td>
+Rmd
+</td>
+<td>
 <a href="https://github.com/pcarbo/mr-ash/blob/a17034e67dfa7727e6bb06ac81226ce8ccbf7c90/analysis/difficult_example.Rmd" target="_blank">a17034e</a>
 </td>
 <td>
@@ -493,22 +528,41 @@ wflow_publish(“difficult_example.Rmd”)
 </div>
 </div>
 </div>
-<p>To our surprise, we discovered that the Lasso (or Elastic Net) sometimes provides more considerably more accurate predictions than mr.ash in settings where many predictors have a small effect on the outcome. Here I expand on an example from <a href="https://stephens999.github.io/misc/mr_ash_vs_lasso.html">Matthew’s brief investigation</a> to better understand the (mis) behaviour of mr.ash.</p>
-<p>These are the packages we will use in the example.</p>
+<p>To our surprise, we discovered that the Lasso (or Elastic Net) sometimes provides more considerably more accurate predictions than mr.ash in settings where many predictors have a small effect on the outcome. Here I expand on an example from <a href="https://stephens999.github.io/misc/mr_ash_vs_lasso.html">Matthew’s brief investigation of this phenomenon</a> to better understand the (mis) behaviour of mr.ash.</p>
+<div id="load-packages" class="section level2">
+<h2>Load packages</h2>
+<p>These are the packages used in the analysis.</p>
 <pre class="r"><code>library(glmnet)
-# Loading required package: Matrix
-# Loaded glmnet 4.0-2
 library(varbvs)
 library(mr.ash.alpha)
 library(ggplot2)
-library(cowplot)
-# 
-# ********************************************************
-# Note: As of version 1.0.0, cowplot does not change the
-#   default ggplot2 theme anymore. To recover the previous
-#   behavior, execute:
-#   theme_set(theme_cowplot())
-# ********************************************************</code></pre>
+library(cowplot)</code></pre>
+</div>
+<div id="simulate-data" class="section level2">
+<h2>Simulate data</h2>
+<p>I simulate the data just as Matthew did, except that I split the data into a training and a test set.</p>
+<p>These are the data simulation settings: the number of samples in training set, “n”; number of simulated variables, “p”; the number of variables affecting the outcome (“p1”); and the proportion of variance in the outcome explained by the variables (“pve”).</p>
+<pre class="r"><code>n   &lt;- 500
+p   &lt;- 1000
+p1  &lt;- 467
+pve &lt;- 0.95</code></pre>
+<p>Simulate a <span class="math inline">\(2n x p\)</span> design matrix; the first <span class="math inline">\(n\)</span> rows is the training set data, and the remaining <span class="math inline">\(n\)</span> rows are the test data.</p>
+<pre class="r"><code>X &lt;- matrix(rnorm(2*n*p),2*n,p)
+X &lt;- scale(X,center = TRUE,scale = TRUE)</code></pre>
+<p>Simulate the <span class="math inline">\(p\)</span> regression coefficients; only <span class="math inline">\(p_1 &lt; p\)</span> of the coefficients are nonzero.</p>
+<pre class="r"><code>b    &lt;- rep(0,p)
+j    &lt;- sample(p,p1)
+b[j] &lt;- rnorm(p1)</code></pre>
+<p>Simulate the responses so that the target PVE is met.</p>
+<pre class="r"><code>y  &lt;- drop(X %*% b)
+se &lt;- sqrt((1 - pve)/pve) * sd(y)
+y  &lt;- y + rnorm(n,sd = se)</code></pre>
+<p>Split the data 50-50 into a training set and a test set.</p>
+<pre class="r"><code>test  &lt;- 1:n
+Xtest &lt;- X[test,]
+ytest &lt;- y[test]
+X     &lt;- X[-test,]
+y     &lt;- y[-test]</code></pre>
 <br>
 <p>
 <button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
@@ -554,6 +608,7 @@ library(cowplot)
 # [46] pkgconfig_2.0.3     assertthat_0.2.1    rmarkdown_2.0      
 # [49] iterators_1.0.12    R6_2.4.1            git2r_0.26.1       
 # [52] compiler_3.6.2</code></pre>
+</div>
 </div>
 
 
