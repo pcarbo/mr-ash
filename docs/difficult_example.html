@@ -414,16 +414,16 @@ This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcompcarbomrashtree60e964af8f6b91814457ccf01c70228b4600ba7btargetblank60e964aa"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/pcarbo/mr-ash/tree/60e964af8f6b91814457ccf01c70228b4600ba7b" target="_blank">60e964a</a> </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcompcarbomrashtreefab51cdabf8a1ee5171ccc97b96ec26942a7f32atargetblankfab51cda"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/pcarbo/mr-ash/tree/fab51cdabf8a1ee5171ccc97b96ec26942a7f32a" target="_blank">fab51cd</a> </a>
 </p>
 </div>
-<div id="strongRepositoryversionstrongahrefhttpsgithubcompcarbomrashtree60e964af8f6b91814457ccf01c70228b4600ba7btargetblank60e964aa" class="panel-collapse collapse">
+<div id="strongRepositoryversionstrongahrefhttpsgithubcompcarbomrashtreefab51cdabf8a1ee5171ccc97b96ec26942a7f32atargetblankfab51cda" class="panel-collapse collapse">
 <div class="panel-body">
 <p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility.
 </p>
 <p>
-The results in this page were generated with repository version <a href="https://github.com/pcarbo/mr-ash/tree/60e964af8f6b91814457ccf01c70228b4600ba7b" target="_blank">60e964a</a>. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
+The results in this page were generated with repository version <a href="https://github.com/pcarbo/mr-ash/tree/fab51cdabf8a1ee5171ccc97b96ec26942a7f32a" target="_blank">fab51cd</a>. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
 </p>
 <p>
 Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
@@ -470,6 +470,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/pcarbo/mr-ash/blob/fab51cdabf8a1ee5171ccc97b96ec26942a7f32a/analysis/difficult_example.Rmd" target="_blank">fab51cd</a>
+</td>
+<td>
+Peter Carbonetto
+</td>
+<td>
+2020-06-23
+</td>
+<td>
+wflow_publish(“difficult_example.Rmd”)
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/pcarbo/mr-ash/2e4785479d9b4c5bd03e6e95b7f605339dc05d80/docs/difficult_example.html" target="_blank">2e47854</a>
+</td>
+<td>
+Peter Carbonetto
+</td>
+<td>
+2020-06-23
+</td>
+<td>
+Implemented data simulation step in difficult_example.
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -546,7 +580,7 @@ library(cowplot)</code></pre>
 p   &lt;- 1000
 p1  &lt;- 467
 pve &lt;- 0.95</code></pre>
-<p>Simulate a <span class="math inline">\(2n x p\)</span> design matrix; the first <span class="math inline">\(n\)</span> rows is the training set data, and the remaining <span class="math inline">\(n\)</span> rows are the test data.</p>
+<p>Simulate a <span class="math inline">\(2n \times p\)</span> design matrix; the first <span class="math inline">\(n\)</span> rows is the training set data, and the remaining <span class="math inline">\(n\)</span> rows are the test data.</p>
 <pre class="r"><code>X &lt;- matrix(rnorm(2*n*p),2*n,p)
 X &lt;- scale(X,center = TRUE,scale = TRUE)</code></pre>
 <p>Simulate the <span class="math inline">\(p\)</span> regression coefficients; only <span class="math inline">\(p_1 &lt; p\)</span> of the coefficients are nonzero.</p>
@@ -563,6 +597,35 @@ Xtest &lt;- X[test,]
 ytest &lt;- y[test]
 X     &lt;- X[-test,]
 y     &lt;- y[-test]</code></pre>
+</div>
+<div id="fit-the-elastic-net-and-mr.ash-models" class="section level2">
+<h2>Fit the elastic net and mr.ash models</h2>
+<p>Fit the Elastic Net model, in which the penalty strength parameter (“lambda”) is chosen via 10-fold cross-validation.</p>
+<pre class="r"><code>fit.glmnet &lt;- cv.glmnet(X,y,alpha = 0.95,standardize = FALSE)</code></pre>
+<p>Fit the mr.ash model using the default settings.</p>
+<pre><code># Mr.ASH terminated at iteration 1000.</code></pre>
+<p>Fit the mr.ash model again, but give it some help by providing it with the prior and residual variance used to simulate the data, and initialize the coefficients to the Elastic Net estimates.</p>
+<pre class="r"><code>b  &lt;- coef(fit.glmnet)[-1]
+w1 &lt;- p1/p
+s  &lt;- se^2
+fit.trueg &lt;- mr.ash(X,y,beta.init = b,update.pi = FALSE,update.sigma2 = FALSE,
+                    sigma2 = s,sa2 = c(0,1/s),pi = c(1 - w1,w1))
+# Warning in mr.ash(X, y, beta.init = b, update.pi = FALSE, update.sigma2 =
+# FALSE, : The mixture proportion associated with the largest prior variance is
+# greater than zero; this indicates that the model fit could be improved by using
+# a larger setting of the prior variance. Consider increasing the range of the
+# variances &quot;sa2&quot;.
+# Mr.ASH terminated at iteration 368.</code></pre>
+</div>
+<div id="now-we-provide-mr.ash-with-a-slightly-weaker-unfair-advantage" class="section level1">
+<h1>Now we provide mr.ash with a slightly weaker (unfair) advantage,</h1>
+</div>
+<div id="where-we-initialize-it-to-the-prior-used-to-simulate-the-data-but" class="section level1">
+<h1>where we initialize it to the prior used to simulate the data, but</h1>
+</div>
+<div id="allow-it-to-fit-the-prior." class="section level1">
+<h1>allow it to fit the prior.</h1>
+<p>fit.initoptg &lt;- mr.ash(X,y,beta.init = coef(fit.glmnet)[-1], update.pi = TRUE,update.sigma2 = FALSE, sigma2 = s,sa2 = c(0,1/s),pi = c(1 - w1,w1))</p>
 <br>
 <p>
 <button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
