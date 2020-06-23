@@ -52,6 +52,7 @@ Simulate a $2n \times p$ design matrix; the first $n$ rows is the
 training set data, and the remaining $n$ rows are the test data.
 
 ```{r sim-x}
+set.seed(15)
 X <- matrix(rnorm(2*n*p),2*n,p)
 X <- scale(X,center = TRUE,scale = TRUE)
 ```
@@ -87,7 +88,7 @@ Fit the elastic net and mr.ash models
 -------------------------------------
 
 Fit the Elastic Net model, in which the penalty strength parameter
-("lambda") is chosen via 10-fold cross-validation.
+($\lambda$) is chosen via 10-fold cross-validation.
 
 ```{r fit-glmnet}
 fit.glmnet <- cv.glmnet(X,y,alpha = 0.95,standardize = FALSE)
@@ -95,15 +96,16 @@ fit.glmnet <- cv.glmnet(X,y,alpha = 0.95,standardize = FALSE)
 
 Fit the mr.ash model using the default settings.
 
-```{r fit-mr-ash-1, warning=FALSE, echo=FALSE}
+```{r fit-mr-ash-1, warning=FALSE, results="hide"}
 fit.mrash <- mr.ash(X,y,standardize = FALSE)
 ```
 
 Fit the mr.ash model again, but give it some help by providing it with
-the prior and residual variance used to simulate the data, and
-initialize the coefficients to the Elastic Net estimates.
+the prior and residual variance used to simulate the data. Also, the
+posterior estimates of the coefficients are initialized to the Elastic
+Net estimates.
 
-```{r fit-mr-ash-2}
+```{r fit-mr-ash-2, warning=FALSE, results="hide"}
 b  <- coef(fit.glmnet)[-1]
 w1 <- p1/p
 s  <- se^2
@@ -111,12 +113,41 @@ fit.trueg <- mr.ash(X,y,beta.init = b,update.pi = FALSE,update.sigma2 = FALSE,
                     sigma2 = s,sa2 = c(0,1/s),pi = c(1 - w1,w1))
 ```
 
-# Now we provide mr.ash with a slightly weaker (unfair) advantage,
-# where we initialize it to the prior used to simulate the data, but
-# allow it to fit the prior.
-fit.initoptg <- mr.ash(X,y,beta.init = coef(fit.glmnet)[-1],
-                       update.pi = TRUE,update.sigma2 = FALSE,
-                       sigma2 = s,sa2 = c(0,1/s),pi = c(1 - w1,w1))
+Now we provide mr.ash with a little less help: we initialize the prior
+to the settings used to simulate the data, but allow mr.ash to fit the
+prior.
+
+```{r fit-mr-ash-3, warning=FALSE, results="hide"}
+fit.trueginit <- mr.ash(X,y,beta.init = coef(fit.glmnet)[-1],
+                        update.pi = TRUE,update.sigma2 = FALSE,
+                        sigma2 = s,sa2 = c(0,1/s),pi = c(1 - w1,w1))
+```
+
+Evaluate models on test set
+---------------------------
+
+Predict the test set outcomes using the fitted models.
+
+```{r predict-test-outcomes}
+y.glmnet    <- drop(predict(fit.glmnet,Xtest,s = "lambda.min"))
+y.mrash     <- predict(fit.mrash,Xtest)
+y.trueg     <- predict(fit.trueg,Xtest)
+y.trueginit <- predict(fit.trueginit,Xtest)
+```
+
+Report the accuracy of the test predictions by the root-mean
+squared error (RMSE).
+
+```{r compute-rmse}
+rmse <- function (x, y) sqrt(mean((x - y)^2))
+cat(sprintf("glmnet:                   %0.3f\n",rmse(ytest,y.glmnet)))
+cat(sprintf("mr.ash:                   %0.3f\n",rmse(ytest,y.mrash)))
+cat(sprintf("mr.ash (true prior):      %0.3f\n",rmse(ytest,y.trueg)))
+cat(sprintf("mr.ash (true prior init): %0.3f\n",rmse(ytest,y.trueginit)))
+```
+
+A few surprises
+---------------
 
 [mr-ash-vs-lasso]: https://stephens999.github.io/misc/mr_ash_vs_lasso.html
 

@@ -12,3 +12,4 @@ for mr-ash.](mr_ash_demo.html)
 + [Comparing two different ways of estimating the mr-ash mixture 
 weights.](em_vs_mixsqp.html)
 
++ [Add title here.](difficult_example.html)
