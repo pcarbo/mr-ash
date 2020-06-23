@@ -61,7 +61,7 @@ fit.initoptg <- mr.ash(X,y,update.pi = TRUE,update.sigma2 = TRUE,
                        sigma2 = s,sa2 = c(0,1/s),pi = c(1 - w1,w1))
 
 fit.varbvs <- varbvs(X,NULL,y,update.sigma = TRUE,sa = 1/s,
-                     logodds = seq(-3,0,length.out = 20),
+                     logodds = seq(-3,0,length.out = 50),
                      verbose = FALSE)
 
 # Predict the test set outcomes using the fitted models.
@@ -81,3 +81,4 @@ print(sqrt(mean((ytest - y.varbvs)^2)),digits = 3)
 
 sigmoid10 <- function (x)  1/(1 + 10^(-x))
 with(fit.varbvs,plot(sigmoid10(logodds),logw,type="l",lwd = 2,log = "x"))
+with(fit.varbvs,points(sigmoid10(logodds),logw,pch = 20))
