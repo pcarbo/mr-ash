@@ -7,7 +7,6 @@ library(mr.ash.alpha)
 # of variables with an effect on the continuous outcome (p1),
 # proportion of variance in the outcome explained by the variables
 # (pve).
-ns  <- 100
 n   <- 500
 p   <- 1000
 p1  <- 467
@@ -50,19 +49,31 @@ fit.mrash <- mr.ash(X,y,standardize = FALSE)
 # advantage to mr.ash by providing it with the prior used to simulate the
 # data.
 w1 <- p1/p
-s  <- var(predict(fit.glmnet,X) - y)
-fit.optg <- mr.ash(X,y,update.pi = FALSE,update.sigma2 = FALSE,
+s  <- se^2
+fit.optg <- mr.ash(X,y,beta.init = coef(fit.glmnet)[-1],
+                   update.pi = FALSE,update.sigma2 = FALSE,
                    sigma2 = s,sa2 = c(0,1/s),pi = c(1 - w1,w1))
 
 # Now we provide mr.ash with a slightly weaker (unfair) advantage,
 # where we initialize it to the prior used to simulate the data, but
 # allow it to fit the prior.
-fit.initoptg <- mr.ash(X,y,update.pi = TRUE,update.sigma2 = TRUE,
+fit.initoptg <- mr.ash(X,y,beta.init = coef(fit.glmnet)[-1],
+                       update.pi = TRUE,update.sigma2 = FALSE,
                        sigma2 = s,sa2 = c(0,1/s),pi = c(1 - w1,w1))
 
-fit.varbvs <- varbvs(X,NULL,y,update.sigma = TRUE,sa = 1/s,
-                     logodds = seq(-3,0,length.out = 50),
+fit.varbvs <- varbvs(X,NULL,y,update.sigma = FALSE,sa = 1/s,
+                     logodds = seq(-3,-1,length.out = 50),
                      verbose = FALSE)
+
+# elbo <- rep(0,50)
+# w1   <- 10^seq(-3,-1,length.out = 50)
+# for (i in 1:50) {
+#   fit <- mr.ash(X,y,beta.init = coef(fit.glmnet)[-1],update.pi = FALSE,
+#                 update.sigma2 = FALSE,sigma2 = s,sa2 = c(0,1/s),
+#                 pi = c(1 - w1[i],w1[i]))
+#   elbo[i] <- -min(fit$varobj)
+# }
+# elbo <- elbo - max(elbo)
 
 # Predict the test set outcomes using the fitted models.
 y.glmnet   <- drop(predict(fit.glmnet,Xtest,s = "lambda.min"))
@@ -79,6 +90,10 @@ print(sqrt(mean((ytest - y.optg)^2)),digits = 3)
 print(sqrt(mean((ytest - y.initoptg)^2)),digits = 3)
 print(sqrt(mean((ytest - y.varbvs)^2)),digits = 3)
 
-sigmoid10 <- function (x)  1/(1 + 10^(-x))
-with(fit.varbvs,plot(sigmoid10(logodds),logw,type="l",lwd = 2,log = "x"))
-with(fit.varbvs,points(sigmoid10(logodds),logw,pch = 20))
+sigmoid10 <- function (x) 1/(1 + 10^(-x))
+logodds <- fit.varbvs$logodds
+logw <- fit.varbvs$logw
+logw <- logw - max(logw)
+plot(sigmoid10(logodds),logw,type="l",lwd = 2,col = "darkblue",log = "x")
+points(sigmoid10(logodds),logw,pch = 20,col = "darkblue")
+
