@@ -1,0 +1,32 @@
+---
+title: Add title here
+author: Peter Carbonetto
+date: June 23, 2020
+site: workflowr::wflow_site
+output: workflowr::wflow_html
+---
+
+To our surprise, we discovered that the Lasso (or Elastic Net)
+sometimes provides more considerably more accurate predictions than
+mr.ash in settings where many predictors have a small effect on the
+outcome. Here I expand on an example from
+[Matthew's brief investigation][mr-ash-vs-lasso] to better understand
+the (mis) behaviour of mr.ash.
+
+```{r knitr, echo=FALSE}
+knitr::opts_chunk$set(comment = "#",results = "hold",collapse = TRUE,
+                      fig.align = "center",dpi = 140)
+```
+
+These are the packages we will use in the example.
+
+```{r load-pkgs}
+library(glmnet)
+library(varbvs)
+library(mr.ash.alpha)
+library(ggplot2)
+library(cowplot)
+```
+
+[mr-ash-vs-lasso]: https://stephens999.github.io/misc/mr_ash_vs_lasso.html
+
