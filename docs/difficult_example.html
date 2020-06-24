@@ -414,23 +414,22 @@ This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcompcarbomrashtreefab51cdabf8a1ee5171ccc97b96ec26942a7f32atargetblankfab51cda"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/pcarbo/mr-ash/tree/fab51cdabf8a1ee5171ccc97b96ec26942a7f32a" target="_blank">fab51cd</a> </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcompcarbomrashtreec6591bcc128b4ec0c0c6bf66fbe5d15debde44b7targetblankc6591bca"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/pcarbo/mr-ash/tree/c6591bcc128b4ec0c0c6bf66fbe5d15debde44b7" target="_blank">c6591bc</a> </a>
 </p>
 </div>
-<div id="strongRepositoryversionstrongahrefhttpsgithubcompcarbomrashtreefab51cdabf8a1ee5171ccc97b96ec26942a7f32atargetblankfab51cda" class="panel-collapse collapse">
+<div id="strongRepositoryversionstrongahrefhttpsgithubcompcarbomrashtreec6591bcc128b4ec0c0c6bf66fbe5d15debde44b7targetblankc6591bca" class="panel-collapse collapse">
 <div class="panel-body">
 <p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility.
 </p>
 <p>
-The results in this page were generated with repository version <a href="https://github.com/pcarbo/mr-ash/tree/fab51cdabf8a1ee5171ccc97b96ec26942a7f32a" target="_blank">fab51cd</a>. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
+The results in this page were generated with repository version <a href="https://github.com/pcarbo/mr-ash/tree/c6591bcc128b4ec0c0c6bf66fbe5d15debde44b7" target="_blank">c6591bc</a>. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
 </p>
 <p>
 Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
 </p>
 <pre><code>
 Unstaged changes:
-    Modified:   analysis/index.Rmd
     Modified:   scripts/difficult_example.R
 
 </code></pre>
@@ -470,6 +469,57 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/pcarbo/mr-ash/blob/c6591bcc128b4ec0c0c6bf66fbe5d15debde44b7/analysis/difficult_example.Rmd" target="_blank">c6591bc</a>
+</td>
+<td>
+Peter Carbonetto
+</td>
+<td>
+2020-06-23
+</td>
+<td>
+wflow_publish(“difficult_example.Rmd”)
+</td>
+</tr>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/pcarbo/mr-ash/blob/52bdce412c8dd9af5676ef9cda1d1ea78cb8e4b1/analysis/difficult_example.Rmd" target="_blank">52bdce4</a>
+</td>
+<td>
+Peter Carbonetto
+</td>
+<td>
+2020-06-23
+</td>
+<td>
+Added prediction and evaluation to difficult_example.
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/pcarbo/mr-ash/f879e7c0cabbece12ad5727536aa8b98819c666f/docs/difficult_example.html" target="_blank">f879e7c</a>
+</td>
+<td>
+Peter Carbonetto
+</td>
+<td>
+2020-06-23
+</td>
+<td>
+Added model fitting steps to difficult_example.
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -562,7 +612,7 @@ wflow_publish(“difficult_example.Rmd”)
 </div>
 </div>
 </div>
-<p>To our surprise, we discovered that the Lasso (or Elastic Net) sometimes provides more considerably more accurate predictions than mr.ash in settings where many predictors have a small effect on the outcome. Here I expand on an example from <a href="https://stephens999.github.io/misc/mr_ash_vs_lasso.html">Matthew’s brief investigation of this phenomenon</a> to better understand the (mis) behaviour of mr.ash.</p>
+<p>To our surprise, we discovered that the Lasso (or Elastic Net) sometimes provides more considerably more accurate predictions than mr.ash in examples where there are many predictors having a small effect on the outcome. Here I expand on an example from <a href="https://stephens999.github.io/misc/mr_ash_vs_lasso.html">Matthew’s brief investigation of this phenomenon</a> to better understand the (mis) behaviour of mr.ash.</p>
 <div id="load-packages" class="section level2">
 <h2>Load packages</h2>
 <p>These are the packages used in the analysis.</p>
@@ -581,7 +631,8 @@ p   &lt;- 1000
 p1  &lt;- 467
 pve &lt;- 0.95</code></pre>
 <p>Simulate a <span class="math inline">\(2n \times p\)</span> design matrix; the first <span class="math inline">\(n\)</span> rows is the training set data, and the remaining <span class="math inline">\(n\)</span> rows are the test data.</p>
-<pre class="r"><code>X &lt;- matrix(rnorm(2*n*p),2*n,p)
+<pre class="r"><code>set.seed(15)
+X &lt;- matrix(rnorm(2*n*p),2*n,p)
 X &lt;- scale(X,center = TRUE,scale = TRUE)</code></pre>
 <p>Simulate the <span class="math inline">\(p\)</span> regression coefficients; only <span class="math inline">\(p_1 &lt; p\)</span> of the coefficients are nonzero.</p>
 <pre class="r"><code>b    &lt;- rep(0,p)
@@ -600,32 +651,64 @@ y     &lt;- y[-test]</code></pre>
 </div>
 <div id="fit-the-elastic-net-and-mr.ash-models" class="section level2">
 <h2>Fit the elastic net and mr.ash models</h2>
-<p>Fit the Elastic Net model, in which the penalty strength parameter (“lambda”) is chosen via 10-fold cross-validation.</p>
+<p>Fit the Elastic Net model, in which the penalty strength parameter (<span class="math inline">\(\lambda\)</span>) is chosen via 10-fold cross-validation.</p>
 <pre class="r"><code>fit.glmnet &lt;- cv.glmnet(X,y,alpha = 0.95,standardize = FALSE)</code></pre>
 <p>Fit the mr.ash model using the default settings.</p>
-<pre><code># Mr.ASH terminated at iteration 1000.</code></pre>
-<p>Fit the mr.ash model again, but give it some help by providing it with the prior and residual variance used to simulate the data, and initialize the coefficients to the Elastic Net estimates.</p>
+<pre class="r"><code>fit.mrash &lt;- mr.ash(X,y,standardize = FALSE)</code></pre>
+<p>Fit the mr.ash model again, but give it some help by providing it with the prior and residual variance used to simulate the data. Also, the posterior estimates of the coefficients are initialized to the Elastic Net estimates.</p>
 <pre class="r"><code>b  &lt;- coef(fit.glmnet)[-1]
 w1 &lt;- p1/p
 s  &lt;- se^2
 fit.trueg &lt;- mr.ash(X,y,beta.init = b,update.pi = FALSE,update.sigma2 = FALSE,
-                    sigma2 = s,sa2 = c(0,1/s),pi = c(1 - w1,w1))
-# Warning in mr.ash(X, y, beta.init = b, update.pi = FALSE, update.sigma2 =
-# FALSE, : The mixture proportion associated with the largest prior variance is
-# greater than zero; this indicates that the model fit could be improved by using
-# a larger setting of the prior variance. Consider increasing the range of the
-# variances &quot;sa2&quot;.
-# Mr.ASH terminated at iteration 368.</code></pre>
+                    sigma2 = s,sa2 = c(0,1/s),pi = c(1 - w1,w1))</code></pre>
+<p>Now we provide mr.ash with a little less help: we initialize the prior to the settings used to simulate the data, but allow mr.ash to fit the prior.</p>
+<pre class="r"><code>fit.trueginit &lt;- mr.ash(X,y,beta.init = coef(fit.glmnet)[-1],
+                        update.pi = TRUE,update.sigma2 = FALSE,
+                        sigma2 = s,sa2 = c(0,1/s),pi = c(1 - w1,w1))</code></pre>
 </div>
-<div id="now-we-provide-mr.ash-with-a-slightly-weaker-unfair-advantage" class="section level1">
-<h1>Now we provide mr.ash with a slightly weaker (unfair) advantage,</h1>
+<div id="evaluate-models-on-test-set" class="section level2">
+<h2>Evaluate models on test set</h2>
+<p>Predict the test set outcomes using the fitted models.</p>
+<pre class="r"><code>y.glmnet    &lt;- drop(predict(fit.glmnet,Xtest,s = &quot;lambda.min&quot;))
+y.mrash     &lt;- predict(fit.mrash,Xtest)
+y.trueg     &lt;- predict(fit.trueg,Xtest)
+y.trueginit &lt;- predict(fit.trueginit,Xtest)</code></pre>
+<p>Report the accuracy of the test predictions by the root-mean squared error (RMSE).</p>
+<pre class="r"><code>rmse &lt;- function (x, y) sqrt(mean((x - y)^2))
+cat(sprintf(&quot;glmnet:                   %0.3f\n&quot;,rmse(ytest,y.glmnet)))
+cat(sprintf(&quot;mr.ash:                   %0.3f\n&quot;,rmse(ytest,y.mrash)))
+cat(sprintf(&quot;mr.ash (true prior):      %0.3f\n&quot;,rmse(ytest,y.trueg)))
+cat(sprintf(&quot;mr.ash (true prior init): %0.3f\n&quot;,rmse(ytest,y.trueginit)))
+# glmnet:                   15.768
+# mr.ash:                   18.536
+# mr.ash (true prior):      16.432
+# mr.ash (true prior init): 19.483</code></pre>
 </div>
-<div id="where-we-initialize-it-to-the-prior-used-to-simulate-the-data-but" class="section level1">
-<h1>where we initialize it to the prior used to simulate the data, but</h1>
+<div id="a-couple-surprises" class="section level2">
+<h2>A couple surprises</h2>
+<p>These results are surprising in a couple ways:</p>
+<ol style="list-style-type: decimal">
+<li><p>The Elastic Net method does very well, despite the fact that we typically think of the method as being best suited for sparse settings in which only a few variables have an effect.</p></li>
+<li><p>Unsuprisingly, mr.ash does well when the prior is fixed to the true settings. However, initializing the mr.ash prior to the truth, then fitting the prior to the data, does not improve performance at all, and in fact makes things slightly worse (at least in this example).</p></li>
+</ol>
+<p>Let’s investigate this second surprise a little more closely.</p>
 </div>
-<div id="allow-it-to-fit-the-prior." class="section level1">
-<h1>allow it to fit the prior.</h1>
-<p>fit.initoptg &lt;- mr.ash(X,y,beta.init = coef(fit.glmnet)[-1], update.pi = TRUE,update.sigma2 = FALSE, sigma2 = s,sa2 = c(0,1/s),pi = c(1 - w1,w1))</p>
+<div id="add-header-here" class="section level2">
+<h2>Add header here</h2>
+<pre class="r"><code>logodds    &lt;- seq(-3,0,length.out = 50)
+fit.varbvs &lt;- varbvs(X,NULL,y,update.sigma = s,sa = 1/s,
+                     logodds = logodds,verbose = FALSE)</code></pre>
+<pre class="r"><code>sigmoid10 &lt;- function (x) 1/(1 + 10^(-x))
+logw &lt;- fit.varbvs$logw
+pdat &lt;- data.frame(w    = sigmoid10(logodds),
+                   elbo = logw,sigmoid10(logodds))
+ggplot(pdat,aes(x = w,y = elbo)) +
+  geom_point() +
+  geom_line() +
+  scale_x_continuous(trans = &quot;log10&quot;,breaks = c(0.001,0.01,0.1,0.5)) +
+  labs(x = &quot;\u03c0&quot;,y = &quot;ELBO&quot;) +
+  theme_cowplot(10)</code></pre>
+<p><img src="figure/difficult_example.Rmd/plot-elbo-1.png" width="980" style="display: block; margin: auto;" /></p>
 <br>
 <p>
 <button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
@@ -661,16 +744,16 @@ fit.trueg &lt;- mr.ash(X,y,beta.init = b,update.pi = FALSE,update.sigma2 = FALSE
 # [16] RColorBrewer_1.1-2  jpeg_0.1-8.1        foreach_1.4.7      
 # [19] lifecycle_0.1.0     stringr_1.4.0       munsell_0.5.0      
 # [22] gtable_0.3.0        workflowr_1.6.2     codetools_0.2-16   
-# [25] evaluate_0.14       latticeExtra_0.6-29 knitr_1.26         
-# [28] httpuv_1.5.2        Rcpp_1.0.3          promises_1.1.0     
-# [31] backports_1.1.5     scales_1.1.0        fs_1.3.1           
-# [34] png_0.1-7           digest_0.6.23       stringi_1.4.3      
-# [37] dplyr_0.8.3         nor1mix_1.3-0       grid_3.6.2         
-# [40] rprojroot_1.3-2     tools_3.6.2         magrittr_1.5       
-# [43] tibble_2.1.3        crayon_1.3.4        whisker_0.4        
-# [46] pkgconfig_2.0.3     assertthat_0.2.1    rmarkdown_2.0      
-# [49] iterators_1.0.12    R6_2.4.1            git2r_0.26.1       
-# [52] compiler_3.6.2</code></pre>
+# [25] evaluate_0.14       labeling_0.3        latticeExtra_0.6-29
+# [28] knitr_1.26          httpuv_1.5.2        Rcpp_1.0.3         
+# [31] promises_1.1.0      backports_1.1.5     scales_1.1.0       
+# [34] farver_2.0.1        fs_1.3.1            png_0.1-7          
+# [37] digest_0.6.23       stringi_1.4.3       dplyr_0.8.3        
+# [40] nor1mix_1.3-0       grid_3.6.2          rprojroot_1.3-2    
+# [43] tools_3.6.2         magrittr_1.5        tibble_2.1.3       
+# [46] crayon_1.3.4        whisker_0.4         pkgconfig_2.0.3    
+# [49] assertthat_0.2.1    rmarkdown_2.0       iterators_1.0.12   
+# [52] R6_2.4.1            git2r_0.26.1        compiler_3.6.2</code></pre>
 </div>
 </div>
 
