@@ -8,8 +8,8 @@ output: workflowr::wflow_html
 
 To our surprise, we discovered that the Lasso (or Elastic Net)
 sometimes provides more considerably more accurate predictions than
-mr.ash in settings where many predictors have a small effect on the
-outcome. Here I expand on an example from
+mr.ash in examples where there are many predictors having a small
+effect on the outcome. Here I expand on an example from
 [Matthew's brief investigation of this phenomenon][mr-ash-vs-lasso] to
 better understand the (mis) behaviour of mr.ash.
 
@@ -146,8 +146,43 @@ cat(sprintf("mr.ash (true prior):      %0.3f\n",rmse(ytest,y.trueg)))
 cat(sprintf("mr.ash (true prior init): %0.3f\n",rmse(ytest,y.trueginit)))
 ```
 
-A few surprises
+A couple surprises
+------------------
+
+These results are surprising in a couple ways:
+
+1. The Elastic Net method does very well, despite the fact that
+   we typically think of the method as being best suited for sparse
+   settings in which only a few variables have an effect.
+
+2. Unsuprisingly, mr.ash does well when the prior is fixed to the true
+   settings. However, initializing the mr.ash prior to the truth, then
+   fitting the prior to the data, does not improve performance at all,
+   and in fact makes things slightly worse (at least in this example).
+
+Let's investigate this second surprise a little more closely.
+
+Add header here
 ---------------
+
+```{r fit-varbvs, fig.width=4, fig.height=5}
+logodds    <- seq(-3,0,length.out = 50)
+fit.varbvs <- varbvs(X,NULL,y,update.sigma = s,sa = 1/s,
+                     logodds = logodds,verbose = FALSE)
+```
+
+```{r plot-elbo} 
+sigmoid10 <- function (x) 1/(1 + 10^(-x))
+logw <- fit.varbvs$logw
+pdat <- data.frame(w    = sigmoid10(logodds),
+                   elbo = logw,sigmoid10(logodds))
+ggplot(pdat,aes(x = w,y = elbo)) +
+  geom_point() +
+  geom_line() +
+  scale_x_continuous(trans = "log10",breaks = c(0.001,0.01,0.1,0.5)) +
+  labs(x = "\u03c0",y = "ELBO") +
+  theme_cowplot(10)
+```
 
 [mr-ash-vs-lasso]: https://stephens999.github.io/misc/mr_ash_vs_lasso.html
 
