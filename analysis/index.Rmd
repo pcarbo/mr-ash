@@ -7,9 +7,10 @@ output: workflowr::wflow_html
 Follow the links to below to review the results of my analyses.
 
 + [Small demonstration of the very simple co-ordinate ascent algorithm 
-for mr-ash.](mr_ash_demo.html)
+  for mr-ash.](mr_ash_demo.html)
 
 + [Comparing two different ways of estimating the mr-ash mixture 
-weights.](em_vs_mixsqp.html)
+  weights.](em_vs_mixsqp.html)
 
-+ [Add title here.](difficult_example.html)
++ [An example where mr.ash does much worse than 
+  Lasso.](difficult_example.html)

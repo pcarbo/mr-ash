@@ -1,5 +1,5 @@
 ---
-title: Add title here
+title: An example where mr.ash does much worse than Lasso
 author: Peter Carbonetto
 date: June 23, 2020
 site: workflowr::wflow_site
@@ -165,13 +165,13 @@ Let's investigate this second surprise a little more closely.
 Add header here
 ---------------
 
-```{r fit-varbvs, fig.width=4, fig.height=5}
+```{r fit-varbvs}
 logodds    <- seq(-3,0,length.out = 50)
 fit.varbvs <- varbvs(X,NULL,y,update.sigma = s,sa = 1/s,
                      logodds = logodds,verbose = FALSE)
 ```
 
-```{r plot-elbo} 
+```{r plot-elbo, fig.width=4, fig.height=4} 
 sigmoid10 <- function (x) 1/(1 + 10^(-x))
 logw <- fit.varbvs$logw
 pdat <- data.frame(w    = sigmoid10(logodds),

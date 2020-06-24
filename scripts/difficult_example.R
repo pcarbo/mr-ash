@@ -2,11 +2,10 @@ library(glmnet)
 library(varbvs)
 library(mr.ash.alpha)
 
-# Analysis settings: number of simulations (ns), number of samples in
-# training set (n), number of simulated variables (p), maximum number
-# of variables with an effect on the continuous outcome (p1),
-# proportion of variance in the outcome explained by the variables
-# (pve).
+# Analysis settings: number of samples in training set (n), number of
+# simulated variables (p), maximum number of variables with an effect
+# on the continuous outcome (p1), proportion of variance in the
+# outcome explained by the variables (pve).
 n   <- 500
 p   <- 1000
 p1  <- 467
@@ -61,7 +60,7 @@ fit.initoptg <- mr.ash(X,y,beta.init = coef(fit.glmnet)[-1],
                        update.pi = TRUE,update.sigma2 = FALSE,
                        sigma2 = s,sa2 = c(0,1/s),pi = c(1 - w1,w1))
 
-fit.varbvs <- varbvs(X,NULL,y,update.sigma = FALSE,sa = 1/s,
+fit.varbvs <- varbvs(X,NULL,y,update.sigma = TRUE,sa = 1/s,
                      logodds = seq(-3,-1,length.out = 50),
                      verbose = FALSE)
 
