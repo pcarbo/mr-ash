@@ -6,10 +6,10 @@ site: workflowr::wflow_site
 output: workflowr::wflow_html
 ---
 
-To our surprise, we discovered that the Lasso (or Elastic Net)
-sometimes provides more considerably more accurate predictions than
-mr.ash in examples where there are many predictors having a small
-effect on the outcome. Here I expand on an example from
+To our surprise, we discovered that the Lasso (or the Elastic Net)
+sometimes provides more accurate predictions than mr.ash in examples
+where there are many predictors having a small effect on the
+outcome. Here I expand on an example from
 [Matthew's brief investigation of this phenomenon][mr-ash-vs-lasso] to
 better understand the (mis) behaviour of mr.ash.
 
@@ -35,7 +35,7 @@ Simulate data
 -------------
 
 I simulate the data just as Matthew did, except that I split the data
-into a training and a test set.
+into a training set and a test set.
 
 These are the data simulation settings: the number of samples in
 training set, "n"; number of simulated variables, "p"; the number
@@ -101,9 +101,9 @@ fit.mrash <- mr.ash(X,y,standardize = FALSE)
 ```
 
 Fit the mr.ash model again, but give it some help by providing it with
-the prior and residual variance used to simulate the data. Also, the
-posterior estimates of the coefficients are initialized to the Elastic
-Net estimates.
+the prior and residual variance used to simulate the data. Also, I
+initialize the posterior estimates of the regression coefficients are
+to the Elastic Net estimates.
 
 ```{r fit-mr-ash-2, warning=FALSE, results="hide"}
 b  <- coef(fit.glmnet)[-1]
@@ -113,9 +113,11 @@ fit.trueg <- mr.ash(X,y,beta.init = b,update.pi = FALSE,update.sigma2 = FALSE,
                     sigma2 = s,sa2 = c(0,1/s),pi = c(1 - w1,w1))
 ```
 
-Now we provide mr.ash with a little less help: we initialize the prior
-to the settings used to simulate the data, but allow mr.ash to fit the
-prior.
+Now let's run mr.ash again, providing with some help, but a little
+less than before: initialize the prior to the settings used to
+simulate the data, but allow mr.ash to fit the prior. A well-behaving
+likelihood (ELBO) surface will guide the iterates toward a setting
+close to the truth.
 
 ```{r fit-mr-ash-3, warning=FALSE, results="hide"}
 fit.trueginit <- mr.ash(X,y,beta.init = coef(fit.glmnet)[-1],
@@ -166,12 +168,12 @@ Add header here
 ---------------
 
 ```{r fit-varbvs}
-logodds    <- seq(-3,0,length.out = 50)
-fit.varbvs <- varbvs(X,NULL,y,update.sigma = s,sa = 1/s,
-                     logodds = logodds,verbose = FALSE)
+logodds    <- seq(-2,1,length.out = 40)
+fit.varbvs <- varbvs(X,NULL,y,sigma = s,sa = 1/s,logodds = logodds,
+                     verbose = FALSE)
 ```
 
-```{r plot-elbo, fig.width=4, fig.height=4} 
+```{r plot-elbo, fig.width=3, fig.height=2.5} 
 sigmoid10 <- function (x) 1/(1 + 10^(-x))
 logw <- fit.varbvs$logw
 pdat <- data.frame(w    = sigmoid10(logodds),
