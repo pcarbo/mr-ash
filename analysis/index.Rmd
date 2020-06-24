@@ -12,5 +12,4 @@ Follow the links to below to review the results of my analyses.
 + [Comparing two different ways of estimating the mr-ash mixture 
   weights.](em_vs_mixsqp.html)
 
-+ [An example where mr.ash does much worse than 
-  Lasso.](difficult_example.html)
++ [An example where mr.ash does worse than Lasso.](difficult_example.html)
