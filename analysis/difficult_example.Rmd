@@ -1,5 +1,5 @@
 ---
-title: An example where mr.ash does much worse than Lasso
+title: An example where mr.ash does worse than Lasso
 author: Peter Carbonetto
 date: June 23, 2020
 site: workflowr::wflow_site
