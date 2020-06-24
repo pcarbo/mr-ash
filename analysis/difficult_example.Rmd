@@ -164,12 +164,12 @@ These results are surprising in a couple ways:
 
 Let's investigate this second surprise a little more closely.
 
-Add header here
----------------
+Why mr.ash gets $\pi$ wrong
+---------------------------
 
-The (approximate) EM algorithm seems to have identified a local
-maximum at around $\pi = 0.25$, whereas the true setting is nearly
-$\pi = 0.5$:
+The (approximate) EM algorithm---which maximizes the ELBO---seems to
+have identified a local maximum at around $\pi = 0.25$, whereas the
+true setting is nearly $\pi = 0.5$:
 
 ```{r true-g-init-pi}
 fit.trueginit$pi[2]
@@ -183,8 +183,9 @@ fit.varbvs <- varbvs(X,NULL,y,sigma = s,sa = 1/s,
                      logodds = logodds,verbose = FALSE)
 ```
 
-Indeed, the highest point in the ELBO is around $\pi = 0.25$, and it
-drops off rapidly at larger values:
+Indeed, the highest point in the ELBO is around $\pi = 0.25$, but this
+is not a case where the objective surface is flat---in fact, it drops
+off very rapidly as $\pi$ increases beyond that:
 
 ```{r plot-elbo, fig.width=3.25, fig.height=2.5} 
 sigmoid10 <- function (x) 1/(1 + 10^(-x))
@@ -199,7 +200,11 @@ ggplot(pdat,aes(x = w,y = elbo)) +
   theme_cowplot(10)
 ```
 
-In short, ...
+We attribute this sharp drop-off at larger values to the fact the
+ELBO, which is a lower bound to the exact marginal log-likelihood, is
+most accurate for sparser models, and therefore the mr.ash model
+fitting algorithm will have some bias in favour of sparser models (and, in
+the case of the spike-and-slab prior, smaller values of $\pi$).
 
 [mr-ash-vs-lasso]: https://stephens999.github.io/misc/mr_ash_vs_lasso.html
 
