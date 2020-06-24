@@ -167,13 +167,26 @@ Let's investigate this second surprise a little more closely.
 Add header here
 ---------------
 
-```{r fit-varbvs}
-logodds    <- seq(-2,1,length.out = 40)
-fit.varbvs <- varbvs(X,NULL,y,sigma = s,sa = 1/s,logodds = logodds,
-                     verbose = FALSE)
+The (approximate) EM algorithm seems to have identified a local
+maximum at around $\pi = 0.25$, whereas the true setting is nearly
+$\pi = 0.5$:
+
+```{r true-g-init-pi}
+fit.trueginit$pi[2]
 ```
 
-```{r plot-elbo, fig.width=3, fig.height=2.5} 
+We can use `varbvs` to see how the ELBO changes with $\pi$:
+
+```{r fit-varbvs}
+logodds    <- seq(-2,1,length.out = 40)
+fit.varbvs <- varbvs(X,NULL,y,sigma = s,sa = 1/s,
+                     logodds = logodds,verbose = FALSE)
+```
+
+Indeed, the highest point in the ELBO is around $\pi = 0.25$, and it
+drops off rapidly at larger values:
+
+```{r plot-elbo, fig.width=3.25, fig.height=2.5} 
 sigmoid10 <- function (x) 1/(1 + 10^(-x))
 logw <- fit.varbvs$logw
 pdat <- data.frame(w    = sigmoid10(logodds),
@@ -185,6 +198,8 @@ ggplot(pdat,aes(x = w,y = elbo)) +
   labs(x = "\u03c0",y = "ELBO") +
   theme_cowplot(10)
 ```
+
+In short, ...
 
 [mr-ash-vs-lasso]: https://stephens999.github.io/misc/mr_ash_vs_lasso.html
 
