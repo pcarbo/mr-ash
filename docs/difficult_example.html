@@ -414,16 +414,16 @@ This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcompcarbomrashtree4e1961d028deb94a2bba57f24a55396973500949targetblank4e1961da"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/pcarbo/mr-ash/tree/4e1961d028deb94a2bba57f24a55396973500949" target="_blank">4e1961d</a> </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcompcarbomrashtree929e3f57250dda36625f1f20a4aac0a7e15df82atargetblank929e3f5a"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/pcarbo/mr-ash/tree/929e3f57250dda36625f1f20a4aac0a7e15df82a" target="_blank">929e3f5</a> </a>
 </p>
 </div>
-<div id="strongRepositoryversionstrongahrefhttpsgithubcompcarbomrashtree4e1961d028deb94a2bba57f24a55396973500949targetblank4e1961da" class="panel-collapse collapse">
+<div id="strongRepositoryversionstrongahrefhttpsgithubcompcarbomrashtree929e3f57250dda36625f1f20a4aac0a7e15df82atargetblank929e3f5a" class="panel-collapse collapse">
 <div class="panel-body">
 <p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility.
 </p>
 <p>
-The results in this page were generated with repository version <a href="https://github.com/pcarbo/mr-ash/tree/4e1961d028deb94a2bba57f24a55396973500949" target="_blank">4e1961d</a>. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
+The results in this page were generated with repository version <a href="https://github.com/pcarbo/mr-ash/tree/929e3f57250dda36625f1f20a4aac0a7e15df82a" target="_blank">929e3f5</a>. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
 </p>
 <p>
 Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
@@ -467,6 +467,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/pcarbo/mr-ash/blob/929e3f57250dda36625f1f20a4aac0a7e15df82a/analysis/difficult_example.Rmd" target="_blank">929e3f5</a>
+</td>
+<td>
+Peter Carbonetto
+</td>
+<td>
+2020-06-23
+</td>
+<td>
+wflow_publish(“difficult_example.Rmd”)
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/pcarbo/mr-ash/14046ce94ccc4f4540ee58cd2e9de2c5a606bfdf/docs/difficult_example.html" target="_blank">14046ce</a>
+</td>
+<td>
+Peter Carbonetto
+</td>
+<td>
+2020-06-23
+</td>
+<td>
+Adjusted figure dimensions in difficult_example.
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -661,7 +695,7 @@ wflow_publish(“difficult_example.Rmd”)
 </div>
 </div>
 </div>
-<p>To our surprise, we discovered that the Lasso (or Elastic Net) sometimes provides more considerably more accurate predictions than mr.ash in examples where there are many predictors having a small effect on the outcome. Here I expand on an example from <a href="https://stephens999.github.io/misc/mr_ash_vs_lasso.html">Matthew’s brief investigation of this phenomenon</a> to better understand the (mis) behaviour of mr.ash.</p>
+<p>To our surprise, we discovered that the Lasso (or the Elastic Net) sometimes provides more accurate predictions than mr.ash in examples where there are many predictors having a small effect on the outcome. Here I expand on an example from <a href="https://stephens999.github.io/misc/mr_ash_vs_lasso.html">Matthew’s brief investigation of this phenomenon</a> to better understand the (mis) behaviour of mr.ash.</p>
 <div id="load-packages" class="section level2">
 <h2>Load packages</h2>
 <p>These are the packages used in the analysis.</p>
@@ -673,7 +707,7 @@ library(cowplot)</code></pre>
 </div>
 <div id="simulate-data" class="section level2">
 <h2>Simulate data</h2>
-<p>I simulate the data just as Matthew did, except that I split the data into a training and a test set.</p>
+<p>I simulate the data just as Matthew did, except that I split the data into a training set and a test set.</p>
 <p>These are the data simulation settings: the number of samples in training set, “n”; number of simulated variables, “p”; the number of variables affecting the outcome (“p1”); and the proportion of variance in the outcome explained by the variables (“pve”).</p>
 <pre class="r"><code>n   &lt;- 500
 p   &lt;- 1000
@@ -704,13 +738,13 @@ y     &lt;- y[-test]</code></pre>
 <pre class="r"><code>fit.glmnet &lt;- cv.glmnet(X,y,alpha = 0.95,standardize = FALSE)</code></pre>
 <p>Fit the mr.ash model using the default settings.</p>
 <pre class="r"><code>fit.mrash &lt;- mr.ash(X,y,standardize = FALSE)</code></pre>
-<p>Fit the mr.ash model again, but give it some help by providing it with the prior and residual variance used to simulate the data. Also, the posterior estimates of the coefficients are initialized to the Elastic Net estimates.</p>
+<p>Fit the mr.ash model again, but give it some help by providing it with the prior and residual variance used to simulate the data. Also, I initialize the posterior estimates of the regression coefficients are to the Elastic Net estimates.</p>
 <pre class="r"><code>b  &lt;- coef(fit.glmnet)[-1]
 w1 &lt;- p1/p
 s  &lt;- se^2
 fit.trueg &lt;- mr.ash(X,y,beta.init = b,update.pi = FALSE,update.sigma2 = FALSE,
                     sigma2 = s,sa2 = c(0,1/s),pi = c(1 - w1,w1))</code></pre>
-<p>Now we provide mr.ash with a little less help: we initialize the prior to the settings used to simulate the data, but allow mr.ash to fit the prior.</p>
+<p>Now let’s run mr.ash again, providing with some help, but a little less than before: initialize the prior to the settings used to simulate the data, but allow mr.ash to fit the prior. A well-behaving likelihood (ELBO) surface will guide the iterates toward a setting close to the truth.</p>
 <pre class="r"><code>fit.trueginit &lt;- mr.ash(X,y,beta.init = coef(fit.glmnet)[-1],
                         update.pi = TRUE,update.sigma2 = FALSE,
                         sigma2 = s,sa2 = c(0,1/s),pi = c(1 - w1,w1))</code></pre>
@@ -744,9 +778,9 @@ cat(sprintf(&quot;mr.ash (true prior init): %0.3f\n&quot;,rmse(ytest,y.trueginit
 </div>
 <div id="add-header-here" class="section level2">
 <h2>Add header here</h2>
-<pre class="r"><code>logodds    &lt;- seq(-3,0,length.out = 50)
-fit.varbvs &lt;- varbvs(X,NULL,y,update.sigma = s,sa = 1/s,
-                     logodds = logodds,verbose = FALSE)</code></pre>
+<pre class="r"><code>logodds    &lt;- seq(-2,1,length.out = 40)
+fit.varbvs &lt;- varbvs(X,NULL,y,sigma = s,sa = 1/s,logodds = logodds,
+                     verbose = FALSE)</code></pre>
 <pre class="r"><code>sigmoid10 &lt;- function (x) 1/(1 + 10^(-x))
 logw &lt;- fit.varbvs$logw
 pdat &lt;- data.frame(w    = sigmoid10(logodds),
@@ -757,7 +791,7 @@ ggplot(pdat,aes(x = w,y = elbo)) +
   scale_x_continuous(trans = &quot;log10&quot;,breaks = c(0.001,0.01,0.1,0.5)) +
   labs(x = &quot;\u03c0&quot;,y = &quot;ELBO&quot;) +
   theme_cowplot(10)</code></pre>
-<p><img src="figure/difficult_example.Rmd/plot-elbo-1.png" width="560" style="display: block; margin: auto;" /></p>
+<p><img src="figure/difficult_example.Rmd/plot-elbo-1.png" width="420" style="display: block; margin: auto;" /></p>
 <p>
 <button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-plot-elbo-1">
 Past versions of plot-elbo-1.png
@@ -780,6 +814,17 @@ Date
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+<a href="https://github.com/pcarbo/mr-ash/blob/14046ce94ccc4f4540ee58cd2e9de2c5a606bfdf/docs/figure/difficult_example.Rmd/plot-elbo-1.png" target="_blank">14046ce</a>
+</td>
+<td>
+Peter Carbonetto
+</td>
+<td>
+2020-06-23
+</td>
+</tr>
 <tr>
 <td>
 <a href="https://github.com/pcarbo/mr-ash/blob/c80470c53ffec1dedbbe6acdfd596b61a6b938fd/docs/figure/difficult_example.Rmd/plot-elbo-1.png" target="_blank">c80470c</a>
