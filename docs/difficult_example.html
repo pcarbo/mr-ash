@@ -414,16 +414,16 @@ This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcompcarbomrashtree4ee8f1bec8927460dcf43ddd108f1cf41a692e65targetblank4ee8f1ba"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/pcarbo/mr-ash/tree/4ee8f1bec8927460dcf43ddd108f1cf41a692e65" target="_blank">4ee8f1b</a> </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcompcarbomrashtree4182af64ccadc9395491a73af9535e5576ab0104targetblank4182af6a"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/pcarbo/mr-ash/tree/4182af64ccadc9395491a73af9535e5576ab0104" target="_blank">4182af6</a> </a>
 </p>
 </div>
-<div id="strongRepositoryversionstrongahrefhttpsgithubcompcarbomrashtree4ee8f1bec8927460dcf43ddd108f1cf41a692e65targetblank4ee8f1ba" class="panel-collapse collapse">
+<div id="strongRepositoryversionstrongahrefhttpsgithubcompcarbomrashtree4182af64ccadc9395491a73af9535e5576ab0104targetblank4182af6a" class="panel-collapse collapse">
 <div class="panel-body">
 <p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility.
 </p>
 <p>
-The results in this page were generated with repository version <a href="https://github.com/pcarbo/mr-ash/tree/4ee8f1bec8927460dcf43ddd108f1cf41a692e65" target="_blank">4ee8f1b</a>. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
+The results in this page were generated with repository version <a href="https://github.com/pcarbo/mr-ash/tree/4182af64ccadc9395491a73af9535e5576ab0104" target="_blank">4182af6</a>. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
 </p>
 <p>
 Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
@@ -467,6 +467,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/pcarbo/mr-ash/blob/4182af64ccadc9395491a73af9535e5576ab0104/analysis/difficult_example.Rmd" target="_blank">4182af6</a>
+</td>
+<td>
+Peter Carbonetto
+</td>
+<td>
+2020-06-24
+</td>
+<td>
+wflow_publish(“difficult_example.Rmd”)
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/pcarbo/mr-ash/74e83add5acec7b5c35c1872112cf27738dbca24/docs/difficult_example.html" target="_blank">74e83ad</a>
+</td>
+<td>
+Peter Carbonetto
+</td>
+<td>
+2020-06-24
+</td>
+<td>
+Added text to difficult_example.
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -810,16 +844,16 @@ cat(sprintf(&quot;mr.ash (true prior init): %0.3f\n&quot;,rmse(ytest,y.trueginit
 </ol>
 <p>Let’s investigate this second surprise a little more closely.</p>
 </div>
-<div id="add-header-here" class="section level2">
-<h2>Add header here</h2>
-<p>The (approximate) EM algorithm seems to have identified a local maximum at around <span class="math inline">\(\pi = 0.25\)</span>, whereas the true setting is nearly <span class="math inline">\(\pi = 0.5\)</span>:</p>
+<div id="why-mr.ash-gets-pi-wrong" class="section level2">
+<h2>Why mr.ash gets <span class="math inline">\(\pi\)</span> wrong</h2>
+<p>The (approximate) EM algorithm—which maximizes the ELBO—seems to have identified a local maximum at around <span class="math inline">\(\pi = 0.25\)</span>, whereas the true setting is nearly <span class="math inline">\(\pi = 0.5\)</span>:</p>
 <pre class="r"><code>fit.trueginit$pi[2]
 # [1] 0.2470846</code></pre>
 <p>We can use <code>varbvs</code> to see how the ELBO changes with <span class="math inline">\(\pi\)</span>:</p>
 <pre class="r"><code>logodds    &lt;- seq(-2,1,length.out = 40)
 fit.varbvs &lt;- varbvs(X,NULL,y,sigma = s,sa = 1/s,
                      logodds = logodds,verbose = FALSE)</code></pre>
-<p>Indeed, the highest point in the ELBO is around <span class="math inline">\(\pi = 0.25\)</span>, and it drops off rapidly at larger values:</p>
+<p>Indeed, the highest point in the ELBO is around <span class="math inline">\(\pi = 0.25\)</span>, but this is not a case where the objective surface is flat—in fact, it drops off very rapidly as <span class="math inline">\(\pi\)</span> increases beyond that:</p>
 <pre class="r"><code>sigmoid10 &lt;- function (x) 1/(1 + 10^(-x))
 logw &lt;- fit.varbvs$logw
 pdat &lt;- data.frame(w    = sigmoid10(logodds),
@@ -853,6 +887,17 @@ Date
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+<a href="https://github.com/pcarbo/mr-ash/blob/74e83add5acec7b5c35c1872112cf27738dbca24/docs/figure/difficult_example.Rmd/plot-elbo-1.png" target="_blank">74e83ad</a>
+</td>
+<td>
+Peter Carbonetto
+</td>
+<td>
+2020-06-24
+</td>
+</tr>
 <tr>
 <td>
 <a href="https://github.com/pcarbo/mr-ash/blob/767e2a1b4de662df2383e68f0747018146edd45e/docs/figure/difficult_example.Rmd/plot-elbo-1.png" target="_blank">767e2a1</a>
@@ -890,7 +935,7 @@ Peter Carbonetto
 </table>
 </div>
 </div>
-<p>In short, …</p>
+<p>We attribute this sharp drop-off at larger values to the fact the ELBO, which is a lower bound to the exact marginal log-likelihood, is most accurate for sparser models, and therefore the mr.ash model fitting algorithm will have some bias in favour of sparser models (and, in the case of the spike-and-slab prior, smaller values of <span class="math inline">\(\pi\)</span>).</p>
 <br>
 <p>
 <button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
