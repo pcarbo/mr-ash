@@ -76,7 +76,7 @@ compute_elbo2 <- function (bhat, X, y, sigma, s0, w) {
   mu    <- matrix(0,p,K)
   s     <- matrix(0,p,K)
   shat  <- rep(0,p)
-  llik  <- rep(0,p)
+  lbf   <- rep(0,p)
   for (i in 1:p) {
     shat[i] <- sigma/sqrt(d[i])
     s1     <- 1/sqrt(1/shat[i]^2 + 1/s0^2)
@@ -84,16 +84,15 @@ compute_elbo2 <- function (bhat, X, y, sigma, s0, w) {
     logBF  <- log(shat[i]/sqrt(shat[i]^2 + s0^2)) + (mu1/s1)^2/2
     logp1  <- log(w) + logBF
     u      <- max(logp1)
-    llik[i] <- sum(dnorm(y,0,sigma,log = TRUE)) +
-               log(sum(exp(logp1 - u))) + u
+    lbf[i] <- u + log(sum(exp(logp1 - u)))
     mu[i,] <- mu1
     s[i,]  <- s1^2
     alpha[i,] <- normalizelogweights(logp1)
   }
   b <- rowSums(alpha * mu)
   print(b)
-  elbo <- n*(p-1)/2*log(2*pi*sigma^2) - norm2(y - X %*% b)^2/(2*sigma^2) +
-          sum(llik) + sum(((bhat - b)^2 + sum(y^2)/d - bhat^2)/(2*shat^2))
+  elbo <- -n/2*log(2*pi*sigma^2) - norm2(y - X %*% b)^2/(2*sigma^2) +
+          sum(lbf) + sum(((bhat - b)^2 - bhat^2)/(2*shat^2))
   return(elbo)
 }
 theta0 <- rnorm(p)
