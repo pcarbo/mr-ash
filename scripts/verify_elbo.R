@@ -65,8 +65,37 @@ compute_elbo <- function (bhat, X, y, sigma, s0, w) {
   print(elbo,digits = 8)
   return(elbo)
 }
+compute_elbo2 <- function (bhat, X, y, sigma, s0, w) {
+  n     <- length(y)
+  K     <- length(s0)
+  d     <- diag(crossprod(X))
+  alpha <- matrix(0,2,K)
+  mu    <- matrix(0,2,K)
+  s     <- matrix(0,2,K)
+  shat  <- rep(0,2)
+  llik  <- rep(0,2)
+  for (i in 1:2) {
+    shat[i] <- sigma/sqrt(d[i])
+    s1     <- 1/sqrt(1/shat[i]^2 + 1/s0^2)
+    mu1    <- (s1/shat[i])^2*bhat[i]
+    logBF  <- log(shat[i]/sqrt(shat[i]^2 + s0^2)) + (mu1/s1)^2/2
+    logp1  <- log(w) + logBF
+    u      <- max(logp1)
+    llik[i] <- sum(dnorm(y,0,sigma,log = TRUE)) +
+               log(sum(exp(logp1 - u))) + u
+    mu[i,] <- mu1
+    s[i,]  <- s1^2
+    alpha[i,] <- normalizelogweights(logp1)
+  }
+  b <- rowSums(alpha * mu)
+  print(b)
+  elbo <- n/2*log(2*pi*sigma^2) - norm2(y - X %*% b)^2/(2*sigma^2) +
+          sum(llik) + sum(((bhat - b)^2 + sum(y^2)/d - bhat^2)/(2*shat^2))
+  print(elbo,digits = 8)
+  return(elbo)
+}
 theta0 <- rnorm(2)
-out <- optim(theta0,function (par) -compute_elbo(par,X,y,s,s0,w0),
+out <- optim(theta0,function (par) -compute_elbo2(par,X,y,s,s0,w0),
              method = "Nelder-Mead",control = list(reltol = 1e-10))
 print(best)
 print(max(fit$logZ),digits = 10)
