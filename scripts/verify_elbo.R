@@ -91,7 +91,7 @@ compute_elbo2 <- function (bhat, X, y, sigma, s0, w) {
   }
   b <- rowSums(alpha * mu)
   print(b)
-  elbo <- -n/2*log(2*pi*sigma^2) - norm2(y - X %*% b)^2/(2*sigma^2) +
+  elbo <- sum(dnorm(y,X %*% b,sigma,log = TRUE)) +
           sum(lbf) + sum(((bhat - b)^2 - bhat^2)/(2*shat^2))
   return(elbo)
 }
