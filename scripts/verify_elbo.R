@@ -92,7 +92,7 @@ compute_elbo2 <- function (bhat, X, y, sigma, s0, w) {
   b <- rowSums(alpha * mu)
   print(b)
   elbo <- sum(dnorm(y,X %*% b,sigma,log = TRUE)) +
-          sum(lbf) + sum(((bhat - b)^2 - bhat^2)/(2*shat^2))
+          sum((bhat - b)^2/(2*shat^2) + lbf - bhat^2/(2*shat^2))
   return(elbo)
 }
 theta0 <- rnorm(p)
