@@ -1,4 +1,6 @@
-# Perform EM updates for the mr-ash model.
+# Perform EM updates for the mr-ash model, in which the (approximate)
+# E-step is implemented via coordinate-wise updates (method = "cd") or
+# using optim (method = "nm" or method = "bfgs").
 #
 # This implementation is meant to be "instructive"---that is, I've
 # tried to make the code as simple as possible, with an emphasis on
@@ -8,12 +10,14 @@ mr_ash <- function (X, y, se, s0, w0, b, method = c("cd", "nm", "bfgs"),
                     maxiter = 100, tol = 1e-8, update.se = TRUE,
                     update.w0 = TRUE, verbose = TRUE) {
   method <- match.arg(method)
+  p      <- ncol(X)
     
   # Center X and y.
   X <- scale(X,scale = FALSE)
   y <- y - mean(y)
 
-  p    <- ncol(X)
+  # Initialize the free parameters to be optimized. This is only
+  # needed if optim is used.
   vars <- rep(0,p)
   
   # These two variables are used to keep track of the algorithm's
@@ -166,13 +170,19 @@ mr_ash_update_cd <- function (X, y, b, se, s0, w0) {
   return(list(b = b,w0.em = w0.em/p,elbo = elbo,erss = erss))
 }
 
-# TO DO: Explain here what this function is for, and how to use it.
+# Compute approximate mr-ash posteriors by maximizing the variational
+# lower bound using optim.
+#
+# This implementation is meant to be "instructive"---that is, I've
+# tried to make the code as simple as possible, with an emphasis on
+# clarity. Very little effort has been devoted to making the
+# implementation efficient, or the code concise.
 mr_ash_update_optim <- function (X, y, vars, se, s0, w0,
                                  method = c("nm", "bfgs")) {
   method <- match.arg(method)
     
-  # Find the parameters (locally) maximizing the variational lower
-  # bound.
+  # Find the free parameters (locally) maximizing the variational
+  # lower bound.
   if (method == "nm")
     out <- optim(vars,
                  function (vars) -compute_elbo_ss(vars,X,y,se,s0,w0)$elbo,
@@ -181,25 +191,32 @@ mr_ash_update_optim <- function (X, y, vars, se, s0, w0,
   else if (method == "bfgs") {
     # TO DO.
   }
-  vars <- out$par
   
-  # Output the updated posterior mean coefficients (b), the M-step
-  # update for the mixture weights (w0.em), the updated variational
-  # lower bound (elbo), and the updated expected residual sum of
-  # squares (erss).
-  return(c(list(vars = vars),compute_elbo_ss(vars,X,y,se,s0,w0)))
+  # Output the updated free parameters (vars) and the compute_elbo_ss
+  # outputs.
+  return(c(list(vars = out$par),compute_elbo_ss(out$par,X,y,se,s0,w0)))
 }
 
-# TO DO: Explain here what this function does, and how to use it.
+# Compute the variational lower bound using the "summary statistics"
+# parameterization of the variational distribution.
+#
+# This implementation is meant to be "instructive"---that is, I've
+# tried to make the code as simple as possible, with an emphasis on
+# clarity. Very little effort has been devoted to making the
+# implementation efficient, or the code concise.
 compute_elbo_ss <- function (vars, X, y, se, s0, w0) {
-    
-  n <- length(y)
-  p <- length(vars)
+
+  # Get the number of rows (n) and columns (p) of X, and get the
+  # number of mixture components in the mixture prior (k).
+  n <- nrow(X)
+  p <- ncol(X)
   k <- length(w0)
-      
-  xx   <- diag(crossprod(X))
+
+  # Compute the standard errors of the least-squares estimates.
+  xx <- diag(crossprod(X))
   shat <- se/xx
-  
+
+  # Compute the posterior from the 
   b     <- rep(0,p)
   lbf   <- rep(0,p)
   w0.em <- rep(0,k)
@@ -210,10 +227,10 @@ compute_elbo_ss <- function (vars, X, y, se, s0, w0) {
     w0.em  <- w0.em + out$w1
   }
 
-  r    <- drop(y - X %*% b)
-  erss <- norm2(r)^2
+  # Compute the variational lower bound (the ELBO).
+  erss <- norm2(y - X %*% b)^2
   elbo <- -n*log(2*pi*se)/2 - erss/(2*se) +
-          sum(((vars - b)^2 - vars^2)/(2*shat) + lbf)
+          sum(lbf + ((vars - b)^2 - vars^2)/(2*shat))
   
   # Output the updated posterior mean coefficients (b), the M-step
   # update for the mixture weights (w0.em), the updated variational
@@ -223,8 +240,8 @@ compute_elbo_ss <- function (vars, X, y, se, s0, w0) {
 }
 
 # Fit a univariate linear regression model in which the regression
-# coefficient is assigned a normal prior with mean zero and
-# variance s0.
+# coefficient is assigned a normal prior with mean zero and variance
+# s0. Here, bhat = sum(x*y)/sum(x*x) and shat = se/sum(x*x).
 #
 # This implementation is meant to be "instructive"---that is, I've
 # tried to make the code as simple as possible, with an emphasis on
@@ -233,7 +250,7 @@ compute_elbo_ss <- function (vars, X, y, se, s0, w0) {
 bayes_lr_ridge_ss <- function (bhat, shat, se, s0) {
 
   # Compute the posterior mean (mu1) and variance (s1) assuming a
-  # normal prior wiith zero mean and variance s0.
+  # normal prior with zero mean and variance s0.
   s1  <- s0/(1 + s0/shat)
   mu1 <- s1/shat * bhat
 
@@ -247,7 +264,8 @@ bayes_lr_ridge_ss <- function (bhat, shat, se, s0) {
 }
 
 # Fit a univariate linear regression model in which the regression
-# coefficient is assigned a mixture-of-normals prior.
+# coefficient is assigned a mixture-of-normals prior. Here, bhat =
+# sum(x*y)/sum(x*x) and shat = se/sum(x*x).
 #
 # This implementation is meant to be "instructive"---that is, I've
 # tried to make the code as simple as possible, with an emphasis on

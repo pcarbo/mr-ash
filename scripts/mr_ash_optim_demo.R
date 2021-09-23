@@ -1,4 +1,5 @@
-# TO DO: Explain here what this script is for, and how to use it.
+# A small script to illustrate an alternative optimization approach
+# for mr-ash.
 library(varbvs)
 library(mr.ash.alpha)
 
