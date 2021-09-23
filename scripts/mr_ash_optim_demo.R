@@ -31,7 +31,7 @@ s  <- 1
 w0 <- rep(1/3,3)
 b  <- rep(0,p)
 
-# Fit the model using the coordinate ascent updates.
+# Fit the model using coordinate ascent updates.
 fit1 <- mr_ash(X,y,s,s0,w0,b,maxiter = 20)
 
 # Fit the model using Nelder-Mead.
