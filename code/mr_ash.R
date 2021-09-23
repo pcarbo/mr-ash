@@ -139,12 +139,8 @@ mr_ash_update <- function (X, y, b, se, s0, w0) {
 
   # Complete the computation of the expected residual sum of squares
   # (erss) and the variational lower bound (elbo).
-  #
-  # The additional -log(n)/2 term is needed in the ELBO to account for
-  # the intercept (we integrate over the intercept assuming a
-  # degenerate "flat" prior).
   erss <- erss + norm2(r)^2
-  elbo <- elbo - erss/(2*se) - log(n)/2
+  elbo <- elbo - erss/(2*se)
   
   # Output the updated posterior mean coefficients ("b"), the M-step
   # update for the mixture weights ("w0.em"), the updated variational
