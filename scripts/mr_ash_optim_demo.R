@@ -6,7 +6,6 @@ library(mr.ash.alpha)
 # algorithm.
 source("../code/misc.R")
 source("../code/mr_ash.R")
-source("../code/mr_ash_optim.R")
 
 # These are the data simulation settings.
 n     <- 500
@@ -32,7 +31,7 @@ w0 <- rep(1/3,3)
 b  <- rep(0,p)
 
 # Fit the model using coordinate ascent updates.
-fit1 <- mr_ash(X,y,s,s0,w0,b,maxiter = 20)
+fit1 <- mr_ash(X,y,s,s0,w0,b,method = "cd",maxiter = 20)
 
 # Fit the model using Nelder-Mead.
 # *** TO DO ***

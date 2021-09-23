@@ -4,8 +4,9 @@
 # tried to make the code as simple as possible, with an emphasis on
 # clarity. Very little effort has been devoted to making the
 # implementation efficient, or the code concise.
-mr_ash <- function (X, y, se, s0, w0, b, maxiter = 100, tol = 1e-8,
-                    update.se = TRUE, update.w0 = TRUE, verbose = TRUE) {
+mr_ash <- function (X, y, se, s0, w0, b, method = c("cd", "nm", "bfgs"),
+                    maxiter = 100, tol = 1e-8, update.se = TRUE,
+                    update.w0 = TRUE, verbose = TRUE) {
 
   # Center X and y.
   X <- scale(X,scale = FALSE)
@@ -29,9 +30,12 @@ mr_ash <- function (X, y, se, s0, w0, b, maxiter = 100, tol = 1e-8,
     
     # E STEP
     # ------
-    # Update the posterior means of the regression coefficients via
-    # co-ordinate ascent.
-    out   <- mr_ash_update(X,y,b,se,s0,w0)
+    # Update the posterior means of the regression coefficients.
+    if (method == "cd")
+      out <- mr_ash_update_cd(X,y,b,se,s0,w0)
+    else {
+      # TO DO.
+    }
     b     <- out$b
     w0.em <- out$w0.em
     
@@ -77,14 +81,14 @@ mr_ash <- function (X, y, se, s0, w0, b, maxiter = 100, tol = 1e-8,
               maxd  = maxd[1:i]))
 }
 
-# Perform a single pass of the co-ordinate ascent updates for the
+# Perform a single pass of the coordinate-wise updates for the
 # mr-ash model.
 #
 # This implementation is meant to be "instructive"---that is, I've
 # tried to make the code as simple as possible, with an emphasis on
 # clarity. Very little effort has been devoted to making the
 # implementation efficient, or the code concise.
-mr_ash_update <- function (X, y, b, se, s0, w0) {
+mr_ash_update_cd <- function (X, y, b, se, s0, w0) {
 
   # Get the number of samples (n), the number of predictors (p), and
   # the number of mixture components (k).
