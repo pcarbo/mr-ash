@@ -9,7 +9,6 @@ source("../code/mr_ash.R")
 
 # These are the data simulation settings.
 n     <- 500
-p     <- 4
 btrue <- c(1,-1,0,0)
 
 # This specifies the variances for the mixture-of-normals prior on the
@@ -18,6 +17,7 @@ s0 <- c(0.001,0.5,1)^2
 
 # Simulate a data set.
 set.seed(1)
+p <- length(btrue)
 X <- matrix(rnorm(n*p),n,p)
 X <- scale(X,center = TRUE,scale = FALSE)
 y <- drop(X %*% btrue + rnorm(n))
@@ -34,7 +34,7 @@ b  <- rep(0,p)
 fit1 <- mr_ash(X,y,s,s0,w0,b,method = "cd",maxiter = 20)
 
 # Fit the model using Nelder-Mead.
-# *** TO DO ***
+fit2 <- mr_ash(X,y,s,s0,w0,b,method = "nm",maxiter = 20)
            
 # Check my calculations against mr.ash.alpha and varbvsmix.
 fit3 <- with(fit1,
@@ -46,6 +46,7 @@ fit4 <- with(fit1,
                   update.sigma = FALSE,update.w = FALSE,
                   maxiter = 20,tol = 1e-8,verbose = FALSE))
 b1 <- with(fit4,rowSums(alpha*mu))
-cat(sprintf("mr_ash:       %0.12f\n",max(fit1$elbo)))
-cat(sprintf("mr.ash.alpha: %0.12f\n",max(-fit3$varobj)))
-cat(sprintf("varbvsmix:    %0.12f\n",max(fit4$logZ + log(n)/2)))
+cat(sprintf("mr_ash(method=cd): %0.12f\n",max(fit1$elbo)))
+cat(sprintf("mr_ash(method=nm): %0.12f\n",max(fit2$elbo)))
+cat(sprintf("mr.ash.alpha:      %0.12f\n",max(-fit3$varobj)))
+cat(sprintf("varbvsmix:         %0.12f\n",max(fit4$logZ + log(n)/2)))

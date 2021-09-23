@@ -92,7 +92,7 @@ compute_elbo2 <- function (bhat, X, y, sigma, s0, w) {
   b <- rowSums(alpha * mu)
   print(b)
   elbo <- sum(dnorm(y,X %*% b,sigma,log = TRUE)) +
-          sum((bhat - b)^2/(2*shat^2) + lbf - bhat^2/(2*shat^2))
+          sum(((bhat - b)^2 - bhat^2)/(2*shat^2) + lbf)
   return(elbo)
 }
 theta0 <- rnorm(p)
@@ -101,3 +101,4 @@ out <- optim(theta0,function (par) -compute_elbo2(par,X,y,s,s0,w0),
 print(best)
 print(max(fit$logZ),digits = 10)
 print(-out$value,digits = 10)
+
