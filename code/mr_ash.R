@@ -216,7 +216,11 @@ compute_elbo_ss <- function (vars, X, y, se, s0, w0) {
   xx <- diag(crossprod(X))
   shat <- se/xx
 
-  # Compute the posterior from the 
+  # For each variable i, compute the posterior mean coefficient (b),
+  # the log-Bayes factor (lbf) and the posterior mixture assignment
+  # probabilities (w1) for BSR-mix-sum-stat(bhat,shat,se,w0,s0), where
+  # bhat = vars[i].
+  for the single-variable mr.ash model.
   b     <- rep(0,p)
   lbf   <- rep(0,p)
   w0.em <- rep(0,k)
