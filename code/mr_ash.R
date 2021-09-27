@@ -6,22 +6,20 @@
 # tried to make the code as simple as possible, with an emphasis on
 # clarity. Very little effort has been devoted to making the
 # implementation efficient, or the code concise.
-mr_ash <- function (X, y, se, s0, w0, vars = rep(0,ncol(X)),
+mr_ash <- function (X, y, se, s0, w0, b = rep(0,ncol(X)), vars = b,
                     method = c("cd", "nm", "bfgs"), maxiter = 100,
                     tol = 1e-8, update.se = TRUE, update.w0 = TRUE,
                     verbose = TRUE) {
   method <- match.arg(method)
-  p      <- ncol(X)
-    
+  p <- ncol(X)
+  if (method == "cd")
+    vars <- as.numeric(NA)
+  else
+    b <- vars
+  
   # Center X and y.
   X <- scale(X,scale = FALSE)
   y <- y - mean(y)
-
-  # Initialize the free parameters to be optimized.
-  if (method == "cd") {
-    b    <- vars
-    vars <- NULL
-  }
   
   # These two variables are used to keep track of the algorithm's
   # progress: "elbo" stores the value of the objective (the
@@ -85,6 +83,7 @@ mr_ash <- function (X, y, se, s0, w0, vars = rep(0,ncol(X)),
   #
   # Note that w0 and w0.em will be the same whenever update.w0 = TRUE.
   return(list(b     = b,
+              vars  = vars,
               s0    = s0,
               w0    = w0,
               w0.em = w0.em,
@@ -195,8 +194,8 @@ mr_ash_update_optim <- function (X, y, vars, se, s0, w0,
     out <- optim(vars,
                  function (vars) -compute_elbo_ss(vars,X,y,se,s0,w0)$elbo,
                  function (vars) -compute_elbo_ss(vars,X,y,se,s0,w0)$elbograd,
-                 control = list(maxit = 200,reltol = 1e-15),
-                 method = "BFGS",hessian = TRUE)
+                 control = list(maxit = 200,reltol = 1e-12),
+                 method = "BFGS")
   }
   
   # Output the updated free parameters (vars) and the compute_elbo_ss
@@ -245,7 +244,9 @@ compute_elbo_ss <- function (vars, X, y, se, s0, w0) {
           sum(lbf + ((vars - b)^2 - vars^2)/(2*shat))
 
   # Compute the gradient of the ELBO.
-  elbograd <- s/shat * (drop(y %*% X - t(X %*% b) %*% X)/se + (b - vars)/shat)
+  xx       <- diag(crossprod(X))
+  yhat     <- drop(X %*% b)
+  elbograd <- s/shat * (drop((y - yhat) %*% X)/se + (b - vars)/shat)
   
   # Output the updated posterior mean coefficients (b), the M-step
   # update for the mixture weights (w0.em), the updated variational

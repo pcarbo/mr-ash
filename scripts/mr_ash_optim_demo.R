@@ -34,7 +34,7 @@ w0 <- rep(1/3,3)
 fit1 <- mr_ash(X,y,s,s0,w0,method = "cd",maxiter = 20)
 
 # Fit the model using quasi-Newton (BFGS) updates.
-fit2 <- mr_ash(X,y,s,s0,w0,b,method = "bfgs",maxiter = 20)
+fit2 <- mr_ash(X,y,s,s0,w0,method = "bfgs",maxiter = 20)
 
 # Check my calculations against mr.ash.alpha and varbvsmix.
 fit3 <- with(fit1,
