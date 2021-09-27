@@ -6,9 +6,10 @@
 # tried to make the code as simple as possible, with an emphasis on
 # clarity. Very little effort has been devoted to making the
 # implementation efficient, or the code concise.
-mr_ash <- function (X, y, se, s0, w0, b, method = c("cd", "nm", "bfgs"),
-                    maxiter = 100, tol = 1e-8, update.se = TRUE,
-                    update.w0 = TRUE, verbose = TRUE) {
+mr_ash <- function (X, y, se, s0, w0, vars = rep(0,ncol(X)),
+                    method = c("cd", "nm", "bfgs"), maxiter = 100,
+                    tol = 1e-8, update.se = TRUE, update.w0 = TRUE,
+                    verbose = TRUE) {
   method <- match.arg(method)
   p      <- ncol(X)
     
@@ -16,9 +17,11 @@ mr_ash <- function (X, y, se, s0, w0, b, method = c("cd", "nm", "bfgs"),
   X <- scale(X,scale = FALSE)
   y <- y - mean(y)
 
-  # Initialize the free parameters to be optimized. This is only
-  # needed if optim is used.
-  vars <- rep(0,p)
+  # Initialize the free parameters to be optimized.
+  if (method == "cd") {
+    b    <- vars
+    vars <- NULL
+  }
   
   # These two variables are used to keep track of the algorithm's
   # progress: "elbo" stores the value of the objective (the
@@ -189,7 +192,11 @@ mr_ash_update_optim <- function (X, y, vars, se, s0, w0,
                  control = list(maxit = 200,reltol = 1e-12),
                  method = "Nelder-Mead")
   else if (method == "bfgs") {
-    # TO DO.
+    out <- optim(vars,
+                 function (vars) -compute_elbo_ss(vars,X,y,se,s0,w0)$elbo,
+                 function (vars) -compute_elbo_ss(vars,X,y,se,s0,w0)$elbograd,
+                 control = list(maxit = 200,reltol = 1e-15),
+                 method = "BFGS",hessian = TRUE)
   }
   
   # Output the updated free parameters (vars) and the compute_elbo_ss
@@ -217,15 +224,17 @@ compute_elbo_ss <- function (vars, X, y, se, s0, w0) {
   shat <- se/xx
 
   # For each variable i, compute the posterior mean coefficient (b),
-  # the log-Bayes factor (lbf) and the posterior mixture assignment
-  # probabilities (w1) for BSR-mix-sum-stat(bhat,shat,se,w0,s0), where
-  # bhat = vars[i].
+  # the posterior variance (s), the log-Bayes factor (lbf) and the
+  # posterior mixture assignment probabilities (w1) for
+  # BSR-mix-sum-stat(bhat,shat,se,w0,s0), where bhat = vars[i].
   b     <- rep(0,p)
+  s     <- rep(0,p)
   lbf   <- rep(0,p)
   w0.em <- rep(0,k)
   for (i in 1:p) {
     out    <- bayes_lr_mix_ss(vars[i],shat[i],se,s0,w0)
     b[i]   <- out$mu1
+    s[i]   <- out$s1
     lbf[i] <- out$lbf
     w0.em  <- w0.em + out$w1
   }
@@ -234,12 +243,16 @@ compute_elbo_ss <- function (vars, X, y, se, s0, w0) {
   erss <- norm2(y - X %*% b)^2
   elbo <- -n*log(2*pi*se)/2 - erss/(2*se) +
           sum(lbf + ((vars - b)^2 - vars^2)/(2*shat))
+
+  # Compute the gradient of the ELBO.
+  elbograd <- s/shat * (drop(y %*% X - t(X %*% b) %*% X)/se + (b - vars)/shat)
   
   # Output the updated posterior mean coefficients (b), the M-step
   # update for the mixture weights (w0.em), the updated variational
   # lower bound (elbo), and the updated expected residual sum of
   # squares (erss).
-  return(list(b = b,w0.em = w0.em/p,elbo = elbo,erss = erss))
+  return(list(b = b,w0.em = w0.em/p,erss = erss,
+              elbo = elbo,elbograd = elbograd))
 }
 
 # Fit a univariate linear regression model in which the regression
