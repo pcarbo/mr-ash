@@ -6,16 +6,11 @@
 # tried to make the code as simple as possible, with an emphasis on
 # clarity. Very little effort has been devoted to making the
 # implementation efficient, or the code concise.
-mr_ash <- function (X, y, se, s0, w0, b = rep(0,ncol(X)), vars = b,
-                    method = c("cd", "nm", "bfgs"), maxiter = 100,
-                    tol = 1e-8, update.se = TRUE, update.w0 = TRUE,
-                    verbose = TRUE) {
+mr_ash <- function (X, y, se, s0, w0, b = rep(0,ncol(X)), 
+                    method = c("cd", "nm", "bfgs"),
+                    maxiter = 100, tol = 1e-8, update.se = TRUE,
+                    update.w0 = TRUE, verbose = TRUE) {
   method <- match.arg(method)
-  p <- ncol(X)
-  if (method == "cd")
-    vars <- as.numeric(NA)
-  else
-    b <- vars
   
   # Center X and y.
   X <- scale(X,scale = FALSE)
@@ -40,10 +35,11 @@ mr_ash <- function (X, y, se, s0, w0, b = rep(0,ncol(X)), vars = b,
     # E STEP
     # ------
     # Update the posterior means of the regression coefficients.
-    if (method == "cd")
-      out <- mr_ash_update_cd(X,y,b,se,s0,w0)
-    else {
-      out  <- mr_ash_update_optim(X,y,vars,se,s0,w0,method)
+    if (method == "cd") {
+      out  <- mr_ash_update_cd(X,y,b,se,s0,w0)
+      vars <- as.numeric(NA)
+    } else {
+      out  <- mr_ash_update_optim(X,y,b,se,s0,w0,method)
       vars <- out$vars
     }
     b     <- out$b
@@ -179,10 +175,14 @@ mr_ash_update_cd <- function (X, y, b, se, s0, w0) {
 # tried to make the code as simple as possible, with an emphasis on
 # clarity. Very little effort has been devoted to making the
 # implementation efficient, or the code concise.
-mr_ash_update_optim <- function (X, y, vars, se, s0, w0,
+mr_ash_update_optim <- function (X, y, b, se, s0, w0,
                                  method = c("nm", "bfgs")) {
   method <- match.arg(method)
-    
+
+  # Recover the free parameters (vars) given the posterior mean
+  # estimates (b).
+  vars <- b2vars(X,y,b)
+
   # Find the free parameters (locally) maximizing the variational
   # lower bound.
   if (method == "nm")
@@ -219,7 +219,7 @@ compute_elbo_ss <- function (vars, X, y, se, s0, w0) {
   k <- length(w0)
 
   # Compute the standard errors of the least-squares estimates.
-  xx <- diag(crossprod(X))
+  xx   <- diag(crossprod(X))
   shat <- se/xx
 
   # For each variable i, compute the posterior mean coefficient (b),
@@ -244,7 +244,6 @@ compute_elbo_ss <- function (vars, X, y, se, s0, w0) {
           sum(lbf + ((vars - b)^2 - vars^2)/(2*shat))
 
   # Compute the gradient of the ELBO.
-  xx       <- diag(crossprod(X))
   yhat     <- drop(X %*% b)
   elbograd <- s/shat * (drop((y - yhat) %*% X)/se + (b - vars)/shat)
   
@@ -254,6 +253,14 @@ compute_elbo_ss <- function (vars, X, y, se, s0, w0) {
   # squares (erss).
   return(list(b = b,w0.em = w0.em/p,erss = erss,
               elbo = elbo,elbograd = elbograd))
+}
+
+# Recover the free parameters (vars) for the variational distribution
+# given posterior mean estimates (b) maximizing the ELBO.
+b2vars <- function (X, y, b) {
+  xx   <- diag(crossprod(X))
+  yhat <- drop(X %*% b)
+  return(b + drop((y - yhat) %*% X)/xx)
 }
 
 # Fit a univariate linear regression model in which the regression

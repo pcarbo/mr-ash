@@ -36,25 +36,6 @@ fit1 <- mr_ash(X,y,s,s0,w0,method = "cd",maxiter = 20)
 # Fit the model using quasi-Newton (BFGS) updates.
 fit2 <- mr_ash(X,y,s,s0,w0,method = "bfgs",maxiter = 20)
 
-# Verify that the BFGS updates have recovered a solution (i.e., a
-# local maximum of the ELBO).
-vars <- fit2$vars
-b    <- fit2$b
-yhat <- drop(X %*% b)
-lhs  <- rep(0,p)
-rhs  <- rep(0,p)
-for (i in 1:p) {
-  x      <- X[,i]
-  lhs[i] <- sum(x*(y - x*vars[i]))
-  rhs[i] <- sum(x*(yhat - x*b[i]))
-}
-print(cbind(lhs,rhs))
-
-# This code can be used to recover the free parameters (vars) from the
-# corresponding posterior mean estimate of the coefficients (b).
-xx   <- diag(crossprod(X))
-vars <- b + drop((y - yhat) %*% X)/xx
-
 # Check my calculations against mr.ash.alpha and varbvsmix.
 fit3 <- with(fit1,
              mr.ash(X,y,sa2 = c(0,s0[-1])/se,sigma2 = se,pi = w0,
