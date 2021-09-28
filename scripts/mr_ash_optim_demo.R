@@ -10,7 +10,7 @@ source("../code/mr_ash.R")
 
 # These are the data simulation settings.
 n     <- 500
-btrue <- c(1,-1,0,0)
+btrue <- c(1,-1,rep(0,18))
 
 # This specifies the variances for the mixture-of-normals prior on the
 # regression coefficients.
