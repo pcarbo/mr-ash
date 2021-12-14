@@ -43,8 +43,8 @@ fit3 <- with(fit1,
                     max.iter = 20))
 fit4 <- with(fit1,
              varbvsmix(X,NULL,y,c(0,s0[-1])/se,se,w0,
-                  update.sigma = FALSE,update.w = FALSE,
-                  maxiter = 20,tol = 1e-8,verbose = FALSE))
+                       update.sigma = FALSE,update.w = FALSE,
+                       maxiter = 20,tol = 1e-8,verbose = FALSE))
 b1 <- with(fit4,rowSums(alpha*mu))
 cat(sprintf("mr_ash(method=cd):   %0.12f\n",max(fit1$elbo)))
 cat(sprintf("mr_ash(method=bfgs): %0.12f\n",max(fit2$elbo)))
